@@ -1,6 +1,7 @@
 package io.github.chiang_sh.file_nest.security;
 
 import io.github.chiang_sh.file_nest.user.User;
+
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;

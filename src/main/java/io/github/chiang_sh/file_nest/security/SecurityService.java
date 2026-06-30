@@ -1,7 +1,9 @@
 package io.github.chiang_sh.file_nest.security;
 
 import io.github.chiang_sh.file_nest.user.UserRepository;
+
 import org.jspecify.annotations.NullMarked;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +14,7 @@ public class SecurityService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    @Autowired
     public SecurityService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -19,9 +22,10 @@ public class SecurityService implements UserDetailsService {
     @Override
     @NullMarked
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        return userRepository
+                .findByUsername(username)
                 .map(SecurityUser::new)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "User does not exist: " + username));
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("User does not exist: " + username));
     }
 }
