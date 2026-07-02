@@ -1,6 +1,9 @@
 spring:
   application:
     name: file-nest
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 security:
   cors:
     allowed-origins: http://localhost:3000
