@@ -1,5 +1,6 @@
 package io.github.chiang_sh.file_nest.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,10 +22,14 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    //    @Value("${security.cors.allowed-origins:}")
-    private List<String> allowedOrigins = List.of("http://localhost:3000");
-    //    @Value("${security.cors.allowed-methods:}")
-    private List<String> allowedMethods = List.of("*");
+    @Value("${security.cors.allowed-origins:}")
+    private List<String> allowedOrigins;
+
+    @Value("${security.cors.allowed-methods:}")
+    private List<String> allowedMethods;
+
+    @Value("${security.permitted-urls}")
+    private String[] permittedUrls;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,7 +50,7 @@ public class SecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/api/auth/login", "/api/auth/register")
+                                auth.requestMatchers(permittedUrls)
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())

@@ -1,3 +1,17 @@
 spring:
   application:
     name: file-nest
+security:
+  cors:
+    allowed-origins: http://localhost:3000
+    allowed-methods:
+      GET,
+      POST,
+      OPTIONS
+  permitted-urls:
+    /api/auth/login,
+    /api/auth/register,
+    /v3/api-docs/**,
+    /v3/api-docs.yaml,
+    /swagger-ui/**,
+    /swagger-ui.html
