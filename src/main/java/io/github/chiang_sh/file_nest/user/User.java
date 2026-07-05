@@ -2,6 +2,8 @@ package io.github.chiang_sh.file_nest.user;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,9 +13,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
-    private String password_hash;
-    private LocalDateTime createAt;
+
+    @Column(name="password_hash",nullable = false)
+    private String passwordHash;
+    
+    @CreationTimestamp
+    @Column(name="created_at",nullable = false)
+    private LocalDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -31,19 +39,19 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword_hash() {
-        return password_hash;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public LocalDateTime getCreateAt() {
-        return createAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreateAt(LocalDateTime createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
