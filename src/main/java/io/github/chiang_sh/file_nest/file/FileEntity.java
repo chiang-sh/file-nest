@@ -6,18 +6,18 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "files")
-public class File {
+public class FileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @UuidGenerator
     @Column(nullable = false, unique = true, updatable = false)
-    private String uuid;
+    private UUID uuid;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -28,7 +28,7 @@ public class File {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private File parent;
+    private FileEntity parent;
 
     @Column(name = "storage_path", length = 512)
     private String storagePath;
@@ -43,9 +43,6 @@ public class File {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
-    private List<File> children;
-
     public Long getId() {
         return id;
     }
@@ -54,11 +51,11 @@ public class File {
         this.id = id;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 
@@ -78,11 +75,11 @@ public class File {
         this.type = type;
     }
 
-    public File getParent() {
+    public FileEntity getParent() {
         return parent;
     }
 
-    public void setParent(File parent) {
+    public void setParent(FileEntity parent) {
         this.parent = parent;
     }
 
@@ -116,13 +113,5 @@ public class File {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public List<File> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<File> children) {
-        this.children = children;
     }
 }

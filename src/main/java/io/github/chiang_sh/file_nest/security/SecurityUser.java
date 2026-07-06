@@ -1,6 +1,6 @@
 package io.github.chiang_sh.file_nest.security;
 
-import io.github.chiang_sh.file_nest.user.User;
+import io.github.chiang_sh.file_nest.user.UserEntity;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -12,9 +12,9 @@ import java.util.List;
 
 public class SecurityUser implements UserDetails {
 
-    private final User user;
+    private final UserEntity user;
 
-    public SecurityUser(User user) {
+    public SecurityUser(UserEntity user) {
         this.user = user;
     }
 
@@ -26,7 +26,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return user.getPassword_hash();
+        return user.getPasswordHash();
     }
 
     @Override
