@@ -43,7 +43,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, JsonAuthenticationEntryPoint authenticationEntryPoint) {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
@@ -54,7 +55,7 @@ public class SecurityConfig {
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())
-                .formLogin(form -> form.defaultSuccessUrl("/home", true).permitAll())
+                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint))
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
         return http.build();
     }
