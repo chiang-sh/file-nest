@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -44,7 +45,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, JsonAuthenticationEntryPoint authenticationEntryPoint) {
+            HttpSecurity http,
+            JwtAuthFilter jwtAuthFilter,
+            JsonAuthenticationEntryPoint authenticationEntryPoint) {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
@@ -56,6 +59,7 @@ public class SecurityConfig {
                                         .anyRequest()
                                         .authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
         return http.build();
     }
