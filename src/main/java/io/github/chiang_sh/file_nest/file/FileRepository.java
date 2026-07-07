@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
@@ -26,4 +27,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             WHERE f.parent.uuid = :parentUuid
             AND fp.user.id = :userId""")
     List<FileDto> findChildren(@Param("userId") Long userId, @Param("parentUuid") UUID parentUuid);
+
+    Optional<FileEntity> findByUuid(UUID uuid);
 }

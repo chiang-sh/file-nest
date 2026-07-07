@@ -21,6 +21,9 @@ security:
     allowed-methods:
       GET,
       POST,
+      PUT,
+      PATCH,
+      DELETE,
       OPTIONS
   permitted-urls:
     /api/auth/login,
@@ -29,3 +32,8 @@ security:
     /v3/api-docs.yaml,
     /swagger-ui/**,
     /swagger-ui.html
+minio:
+  endpoint:
+  access-key:
+  secret-key:
+  bucket-name:

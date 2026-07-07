@@ -3,7 +3,6 @@ package io.github.chiang_sh.file_nest.file;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,7 +14,6 @@ public class FileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @UuidGenerator
     @Column(nullable = false, unique = true, updatable = false)
     private UUID uuid;
 
@@ -32,9 +30,6 @@ public class FileEntity {
 
     @Column(name = "storage_path", length = 512)
     private String storagePath;
-
-    @Column(name = "file_hash", length = 64)
-    private String fileHash;
 
     @Column(nullable = false)
     private Long size;
@@ -89,14 +84,6 @@ public class FileEntity {
 
     public void setStoragePath(String storagePath) {
         this.storagePath = storagePath;
-    }
-
-    public String getFileHash() {
-        return fileHash;
-    }
-
-    public void setFileHash(String fileHash) {
-        this.fileHash = fileHash;
     }
 
     public Long getSize() {
