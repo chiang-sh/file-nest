@@ -4,8 +4,12 @@ import io.github.chiang_sh.file_nest.file.FileEntity;
 import io.github.chiang_sh.file_nest.user.UserEntity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -14,23 +18,30 @@ import java.util.UUID;
 public class FilePermissionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @UuidGenerator
-    @Column(nullable = false, unique = true, updatable = false)
+    @NotNull
+    @ColumnDefault("gen_random_uuid()")
+    @Column(name = "uuid", nullable = false)
     private UUID uuid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id")
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "file_id", nullable = false)
     private FileEntity file;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private FilePermissionType permission;
+    @Size(max = 10)
+    @NotNull
+    @Column(name = "permission", nullable = false, length = 10)
+    private String permission;
 
     public Long getId() {
         return id;
@@ -64,11 +75,11 @@ public class FilePermissionEntity {
         this.user = user;
     }
 
-    public FilePermissionType getPermission() {
+    public String getPermission() {
         return permission;
     }
 
-    public void setPermission(FilePermissionType permission) {
+    public void setPermission(String permission) {
         this.permission = permission;
     }
 }

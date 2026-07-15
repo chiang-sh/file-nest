@@ -1,27 +1,35 @@
 package io.github.chiang_sh.file_nest.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "users")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(name="password_hash",nullable = false)
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @CreationTimestamp
-    @Column(name="created_at",nullable = false)
-    private LocalDateTime createdAt;
+    @NotNull
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -47,11 +55,11 @@ public class UserEntity {
         this.passwordHash = passwordHash;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }
