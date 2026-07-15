@@ -1,5 +1,7 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.folder.FolderEntity;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,7 +44,7 @@ public class FileEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "folder_id")
-    private FileEntity folder;
+    private FolderEntity folder;
 
     @NotNull
     @Column(name = "size", nullable = false)
@@ -93,11 +95,11 @@ public class FileEntity {
         this.contentType = contentType;
     }
 
-    public FileEntity getFolder() {
+    public FolderEntity getFolder() {
         return folder;
     }
 
-    public void setFolder(FileEntity folder) {
+    public void setFolder(FolderEntity folder) {
         this.folder = folder;
     }
 
