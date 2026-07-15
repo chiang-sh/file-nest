@@ -12,21 +12,21 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
     @Query(
             """
-            SELECT NEW io.github.chiang_sh.file_nest.file.FileDto(f.uuid, f.name, f.type, f.size, f.createdAt, fp.permission)
+            SELECT NEW io.github.chiang_sh.file_nest.file.FileDto(f.uuid, f.name, f.contentType, f.size, f.createdAt, fp.permission)
             FROM FilePermissionEntity fp
             JOIN fp.file f
-            WHERE f.parent IS NULL
+            WHERE f.folder IS NULL
             AND fp.user.id = :userId""")
-    List<FileDto> findRootChildren(@Param("userId") Long userId);
+    List<FileDto> findRootFiles(@Param("userId") Long userId);
 
     @Query(
             """
-            SELECT NEW io.github.chiang_sh.file_nest.file.FileDto(f.uuid, f.name, f.type, f.size, f.createdAt, fp.permission)
+            SELECT NEW io.github.chiang_sh.file_nest.file.FileDto(f.uuid, f.name, f.contentType, f.size, f.createdAt, fp.permission)
             FROM FilePermissionEntity fp
             JOIN fp.file f
-            WHERE f.parent.uuid = :parentUuid
+            WHERE f.folder.uuid = :folderUuid
             AND fp.user.id = :userId""")
-    List<FileDto> findChildren(@Param("userId") Long userId, @Param("parentUuid") UUID parentUuid);
+    List<FileDto> findChildrenFiles(@Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
 
     Optional<FileEntity> findByUuid(UUID uuid);
 }

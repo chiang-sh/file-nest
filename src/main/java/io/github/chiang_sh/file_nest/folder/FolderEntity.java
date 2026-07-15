@@ -1,4 +1,4 @@
-package io.github.chiang_sh.file_nest.file;
+package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.user.UserEntity;
 

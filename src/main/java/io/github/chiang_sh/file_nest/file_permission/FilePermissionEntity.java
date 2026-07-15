@@ -41,7 +41,8 @@ public class FilePermissionEntity {
     @Size(max = 10)
     @NotNull
     @Column(name = "permission", nullable = false, length = 10)
-    private String permission;
+    @Enumerated(EnumType.STRING)
+    private FilePermissionType permission;
 
     public Long getId() {
         return id;
@@ -75,11 +76,11 @@ public class FilePermissionEntity {
         this.user = user;
     }
 
-    public String getPermission() {
+    public FilePermissionType getPermission() {
         return permission;
     }
 
-    public void setPermission(String permission) {
+    public void setPermission(FilePermissionType permission) {
         this.permission = permission;
     }
 }
