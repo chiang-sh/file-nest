@@ -1,8 +1,9 @@
 package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.common.FileSystemDto;
-import io.github.chiang_sh.file_nest.file.FileDto;
+import io.github.chiang_sh.file_nest.file.dto.FileResponse;
 import io.github.chiang_sh.file_nest.file.FileRepository;
+import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.user.UserEntity;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 
@@ -34,8 +35,8 @@ public class FolderService {
 
     public List<FileSystemDto> getChildren(String username) {
         UserEntity user = userRepository.findByUsername(username).orElseThrow();
-        List<FolderDto> folders = folderRepository.findRootFolders(user.getId());
-        List<FileDto> files = fileRepository.findRootFiles(user.getId());
+        List<FolderResponse> folders = folderRepository.findRootFolders(user.getId());
+        List<FileResponse> files = fileRepository.findRootFiles(user.getId());
         List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
         children.addAll(folders);
         children.addAll(files);
@@ -44,30 +45,30 @@ public class FolderService {
 
     public List<FileSystemDto> getChildren(String username, UUID folderUuid) {
         UserEntity user = userRepository.findByUsername(username).orElseThrow();
-        List<FolderDto> folders = folderRepository.findChildrenFolders(user.getId(), folderUuid);
-        List<FileDto> files = fileRepository.findChildrenFiles(user.getId(), folderUuid);
+        List<FolderResponse> folders = folderRepository.findChildrenFolders(user.getId(), folderUuid);
+        List<FileResponse> files = fileRepository.findChildrenFiles(user.getId(), folderUuid);
         List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
         children.addAll(folders);
         children.addAll(files);
         return children;
     }
 
-    public FolderDto create(String username, String name) {
+    public FolderResponse create(String username, String name) {
         return create(username, name, null);
     }
 
-    public FolderDto create(String username, String name, UUID parentUuid) {
         UserEntity user = userRepository.findByUsername(username).orElseThrow();
+    public FolderResponse create(String username, String name, UUID parentUuid) {
         FolderEntity newFolder = new FolderEntity();
         newFolder.setName(name);
         newFolder.setOwner(user);
 
         if (parentUuid != null) {
-            FolderEntity parent = folderRepository.findByUuid(parentUuid).orElseThrow();
+            FolderEntity parent = folderRepository.findByUuid(parentUuid).orElseThrow(() -> new NoSuchElementException("Parent folder not exist."));
             newFolder.setParentFolder(parent);
         }
 
         newFolder = folderRepository.save(newFolder);
-        return FolderDto.from(newFolder);
+        return FolderResponse.from(newFolder);
     }
 }

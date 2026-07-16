@@ -1,6 +1,9 @@
 package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.common.FileSystemDto;
+import io.github.chiang_sh.file_nest.folder.dto.CreateFolderRequest;
+import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
+import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -39,14 +42,17 @@ public class FolderController {
     }
 
     @PostMapping
-    public FolderDto createFolder(
-            @AuthenticationPrincipal SecurityUser securityUser, @RequestParam String parentUuid, @RequestParam String name) {
-        if (parentUuid == null || name == null || name.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    public FolderResponse createFolder(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @RequestBody CreateFolderRequest body) {
+        if (body.parentUuid() == null || body.name() == null || body.name().isEmpty()) {
         }
-        if (parentUuid.equals(ROOT)) {
-            return folderService.create(securityUser.getUsername(), name);
+        if (body.parentUuid().equals(ROOT)) {
+            return folderService.create(securityUser.getUsername(), body.name());
         }
-        return folderService.create(securityUser.getUsername(), name, UUID.fromString(parentUuid));
+        return folderService.create(
+                securityUser.getUsername(), body.name(), UUID.fromString(body.parentUuid()));
+
     }
 }
