@@ -72,4 +72,11 @@ public class FolderService {
         newFolder = folderRepository.save(newFolder);
         return FolderResponse.from(newFolder);
     }
+
+    public FolderResponse update(UUID uuid, String name) {
+        FolderEntity folder = folderRepository.findByUuid(uuid).orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
+        folder.setName(name);
+        folderRepository.save(folder);
+        return FolderResponse.from(folder);
+    }
 }

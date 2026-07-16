@@ -53,6 +53,15 @@ public class FolderController {
         }
         return folderService.create(
                 securityUser.getUsername(), body.name(), UUID.fromString(body.parentUuid()));
+    }
 
+    @PatchMapping
+    public FolderResponse updateFolder(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @RequestBody UpdateFolderRequest body) {
+        if (body.uuid() == null || body.name() == null || body.name().isEmpty()) {
+            throw new IllegalArgumentException("The argument must not be null.");
+        }
+        return folderService.update(body.uuid(), body.name());
     }
 }
