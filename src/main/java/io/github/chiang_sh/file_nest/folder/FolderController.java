@@ -2,6 +2,7 @@ package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.common.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.CreateFolderRequest;
+import io.github.chiang_sh.file_nest.folder.dto.DeleteFolderRequest;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,17 +44,15 @@ public class FolderController {
     }
 
     @PostMapping
-    public FolderResponse createFolder(
+    public ResponseEntity<FolderResponse> createFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestBody CreateFolderRequest body) {
         if (body.parentUuid() == null || body.name() == null || body.name().isEmpty()) {
             throw new IllegalArgumentException("The argument must not be null.");
         }
-        if (body.parentUuid().equals(ROOT)) {
-            return folderService.create(securityUser.getUsername(), body.name());
-        }
-        return folderService.create(
+        FolderResponse response = body.parentUuid().equals(ROOT) ? folderService.create(securityUser.getUsername(), body.name()) : folderService.create(
                 securityUser.getUsername(), body.name(), UUID.fromString(body.parentUuid()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping
@@ -62,6 +62,17 @@ public class FolderController {
         if (body.uuid() == null || body.name() == null || body.name().isEmpty()) {
             throw new IllegalArgumentException("The argument must not be null.");
         }
-        return folderService.update(body.uuid(), body.name());
+        return folderService.update(securityUser.getUsername(), body.uuid(), body.name());
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteFolder(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @RequestBody DeleteFolderRequest body) {
+        if (body.uuid() == null) {
+            throw new IllegalArgumentException("The argument must not be null.");
+        }
+        folderService.delete(securityUser.getUsername(), body.uuid());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -29,5 +29,5 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
     List<FolderResponse> findChildrenFolders(
             @Param("userId") Long userId, @Param("folderUuid") UUID folderUuid);
 
-    Optional<FolderEntity> findByUuid(UUID uuid);
+    Optional<FolderEntity> findByUuidAndOwnerId(UUID uuid, Long ownerId);
 }
