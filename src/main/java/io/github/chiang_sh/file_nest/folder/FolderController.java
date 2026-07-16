@@ -42,11 +42,11 @@ public class FolderController {
     }
 
     @PostMapping
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     public FolderResponse createFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestBody CreateFolderRequest body) {
         if (body.parentUuid() == null || body.name() == null || body.name().isEmpty()) {
+            throw new IllegalArgumentException("The argument must not be null.");
         }
         if (body.parentUuid().equals(ROOT)) {
             return folderService.create(securityUser.getUsername(), body.name());

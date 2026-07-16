@@ -6,10 +6,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.NoSuchElementException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> illegalArgumentException(Exception e) {
+        logger.error(e.getMessage(), e);
+        return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<String> noSuchElementException(Exception e) {
+        logger.error(e.getMessage(), e);
+        return ResponseEntity.notFound().build();
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> generalException(Exception e) {
