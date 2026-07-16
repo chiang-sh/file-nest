@@ -6,9 +6,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.*;
+import org.hibernate.generator.EventType;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -21,9 +20,9 @@ public class FolderEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
+    @Generated(event = EventType.INSERT)
     @ColumnDefault("gen_random_uuid()")
-    @Column(name = "uuid", nullable = false)
+    @Column(name = "uuid", nullable = false, insertable = false, updatable = false)
     private UUID uuid;
 
     @Size(max = 255)
@@ -41,9 +40,9 @@ public class FolderEntity {
     @JoinColumn(name = "owner_id")
     private UserEntity owner;
 
-    @NotNull
+    @Generated(event = EventType.INSERT)
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     public Long getId() {
