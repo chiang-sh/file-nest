@@ -5,8 +5,10 @@ import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +18,7 @@ import java.util.UUID;
 @Tag(name = "File manipulation")
 public class FolderController {
 
+    private static final String ROOT = "root";
     private final FolderService folderService;
 
     @Autowired
@@ -23,14 +26,16 @@ public class FolderController {
         this.folderService = folderService;
     }
 
-    @GetMapping("/root/children")
-    public List<FileSystemDto> getRootChildren(@AuthenticationPrincipal SecurityUser securityUser) {
-        return folderService.getChildren(securityUser.getUsername());
-    }
-
     @GetMapping("/{folderUuid}/children")
     public List<FileSystemDto> getChildren(
-            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid) {
-        return folderService.getChildren(securityUser.getUsername(), folderUuid);
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable String folderUuid) {
+        if (folderUuid == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        if (folderUuid.equals(ROOT)) {
+            return folderService.getChildren(securityUser.getUsername());
+        }
+        return folderService.getChildren(securityUser.getUsername(), UUID.fromString(folderUuid));
+    }
     }
 }
