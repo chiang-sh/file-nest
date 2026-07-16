@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
@@ -24,4 +25,6 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
             WHERE f.parentFolder.uuid = :folderUuid
             AND f.owner.id = :userId""")
     List<FolderDto> findChildrenFolders(@Param("userId") Long userId, @Param("folderUuid") UUID folderUuid);
+
+    Optional<FolderEntity> findByUuid(UUID uuid);
 }

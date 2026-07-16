@@ -51,4 +51,23 @@ public class FolderService {
         children.addAll(files);
         return children;
     }
+
+    public FolderDto create(String username, String name) {
+        return create(username, name, null);
+    }
+
+    public FolderDto create(String username, String name, UUID parentUuid) {
+        UserEntity user = userRepository.findByUsername(username).orElseThrow();
+        FolderEntity newFolder = new FolderEntity();
+        newFolder.setName(name);
+        newFolder.setOwner(user);
+
+        if (parentUuid != null) {
+            FolderEntity parent = folderRepository.findByUuid(parentUuid).orElseThrow();
+            newFolder.setParentFolder(parent);
+        }
+
+        newFolder = folderRepository.save(newFolder);
+        return FolderDto.from(newFolder);
+    }
 }

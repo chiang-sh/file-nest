@@ -37,5 +37,16 @@ public class FolderController {
         }
         return folderService.getChildren(securityUser.getUsername(), UUID.fromString(folderUuid));
     }
+
+    @PostMapping
+    public FolderDto createFolder(
+            @AuthenticationPrincipal SecurityUser securityUser, @RequestParam String parentUuid, @RequestParam String name) {
+        if (parentUuid == null || name == null || name.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        if (parentUuid.equals(ROOT)) {
+            return folderService.create(securityUser.getUsername(), name);
+        }
+        return folderService.create(securityUser.getUsername(), name, UUID.fromString(parentUuid));
     }
 }
