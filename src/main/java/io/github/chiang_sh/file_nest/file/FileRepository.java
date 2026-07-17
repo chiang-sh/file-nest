@@ -28,7 +28,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             JOIN fp.file f
             WHERE f.folder.uuid = :folderUuid
             AND fp.user.id = :userId""")
-    List<FileResponse> findChildrenFiles(@Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
+    List<FileResponse> findChildrenFiles(
+            @Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
 
     Optional<FileEntity> findByUuid(UUID uuid);
 }
