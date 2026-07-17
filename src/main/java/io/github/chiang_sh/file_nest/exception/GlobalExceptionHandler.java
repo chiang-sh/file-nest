@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().build();
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
+    @ExceptionHandler(exception = {NoSuchElementException.class, IllegalStateException.class})
     public ResponseEntity<String> noSuchElementException(Exception e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity.notFound().build();

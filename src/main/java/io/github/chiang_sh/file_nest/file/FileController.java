@@ -64,4 +64,14 @@ public class FileController {
         UploadUrlResponse response = new UploadUrlResponse(entity.getUuid(), url);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PatchMapping("/{fileUuid}/confirm")
+    public void confirmUpload(
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid) {
+        try {
+            fileService.confirmUpload(fileUuid);
+        } catch (MinioException e) {
+            throw new IllegalStateException("File " + fileUuid + " upload is not completed.");
+        }
+    }
 }

@@ -110,13 +110,30 @@ public class FileService {
     }
 
     public String uploadUrl(String objectKey) throws MinioException {
-        return
-                minioClient.getPresignedObjectUrl(
-                        GetPresignedObjectUrlArgs.builder()
-                                .method(Http.Method.PUT)
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Http.Method.PUT)
+                        .bucket(properties.getBucketName())
+                        .object(objectKey)
+                        .expiry(5, TimeUnit.MINUTES)
+                        .build());
+    }
+
+    public void confirmUpload(UUID uuid) throws MinioException {
+        FileEntity entity =
+                fileRepository
+                        .findByUuid(uuid)
+                        .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
+
+        StatObjectResponse stat =
+                minioClient.statObject(
+                        StatObjectArgs.builder()
                                 .bucket(properties.getBucketName())
-                                .object(objectKey)
-                                .expiry(5, TimeUnit.MINUTES)
+                                .object(entity.getStoragePath())
                                 .build());
+        entity.setContentType(stat.contentType());
+        entity.setSize(stat.size());
+        entity.setStatus(StatusType.COMPLETED);
+        fileRepository.save(entity);
     }
 }
