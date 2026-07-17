@@ -47,11 +47,11 @@ public class FolderController {
     public ResponseEntity<FolderResponse> createFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestBody CreateFolderRequest body) {
-        if (body.parentUuid() == null || body.name() == null || body.name().isEmpty()) {
+        if (body.name() == null || body.name().isEmpty()) {
             throw new IllegalArgumentException("The argument must not be null.");
         }
-        FolderResponse response = body.parentUuid().equals(ROOT) ? folderService.create(securityUser.getUsername(), body.name()) : folderService.create(
-                securityUser.getUsername(), body.name(), UUID.fromString(body.parentUuid()));
+        FolderResponse response =
+                folderService.create(securityUser.getUsername(), body.name(), body.parentUuid());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

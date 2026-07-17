@@ -63,10 +63,6 @@ public class FolderService {
         return children;
     }
 
-    public FolderResponse create(String username, String name) {
-        return create(username, name, null);
-    }
-
     public FolderResponse create(String username, String name, UUID parentUuid) {
         UserEntity user =
                 userRepository
