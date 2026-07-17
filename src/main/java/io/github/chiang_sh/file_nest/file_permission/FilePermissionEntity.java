@@ -40,7 +40,6 @@ public class FilePermissionEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Size(max = 10)
     @NotNull
     @Column(name = "permission", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)

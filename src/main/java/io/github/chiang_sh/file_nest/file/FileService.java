@@ -1,5 +1,8 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
+import io.github.chiang_sh.file_nest.file_permission.FilePermissionRepository;
+import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;
 import io.github.chiang_sh.file_nest.minio.MinioProperties;
 import io.github.chiang_sh.file_nest.user.UserEntity;
 import io.github.chiang_sh.file_nest.user.UserRepository;
@@ -27,6 +30,7 @@ public class FileService {
 
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
+    private final FilePermissionRepository filePermissionRepository;
     private final MinioClient minioClient;
     private final MinioProperties properties;
 
@@ -34,10 +38,12 @@ public class FileService {
     public FileService(
             UserRepository userRepository,
             FileRepository fileRepository,
+            FilePermissionRepository filePermissionRepository,
             MinioClient minioClient,
             MinioProperties properties) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
+        this.filePermissionRepository = filePermissionRepository;
         this.minioClient = minioClient;
         this.properties = properties;
     }
@@ -92,21 +98,29 @@ public class FileService {
         String minioFilename = uuid + "." + extension;
         String objectKey = String.join("/", "users", Long.toString(user.getId()), minioFilename);
 
-        FileEntity entity = new FileEntity();
-        entity.setUuid(uuid);
-        entity.setName(filename);
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.setUuid(uuid);
+        fileEntity.setName(filename);
         if (parentUuid != null) {
             FileEntity parent =
                     fileRepository
                             .findByUuid(parentUuid)
-                            .orElseThrow(() ->
-                                    new NoSuchElementException(
-                                            "Parent folder not exist: " + parentUuid));
+                            .orElseThrow(
+                                    () ->
+                                            new NoSuchElementException(
+                                                    "Parent folder not exist: " + parentUuid));
         }
-        entity.setStoragePath(objectKey);
-        entity.setStatus(StatusType.PENDING);
-        fileRepository.save(entity);
-        return entity;
+        fileEntity.setStoragePath(objectKey);
+        fileEntity.setStatus(StatusType.PENDING);
+        fileRepository.save(fileEntity);
+
+        FilePermissionEntity permissionEntity = new FilePermissionEntity();
+        permissionEntity.setUser(user);
+        permissionEntity.setFile(fileEntity);
+        permissionEntity.setPermission(FilePermissionType.OWNER);
+        filePermissionRepository.save(permissionEntity);
+
+        return fileEntity;
     }
 
     public String uploadUrl(String objectKey) throws MinioException {
