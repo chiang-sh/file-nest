@@ -39,8 +39,7 @@ public class FileEntity {
     private String storagePath;
 
     @Size(max = 100)
-    @NotNull
-    @Column(name = "content_type", nullable = false, length = 100)
+    @Column(name = "content_type", length = 100)
     private String contentType;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,14 +47,18 @@ public class FileEntity {
     @JoinColumn(name = "folder_id")
     private FolderEntity folder;
 
-    @NotNull
-    @Column(name = "size", nullable = false)
+    @Column(name = "size")
     private Long size;
 
     @Generated(event = EventType.INSERT)
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime createdAt;
+
+    @NotNull
+    @Column(name = "status", nullable = false, length = 10)
+    @Enumerated(EnumType.STRING)
+    private StatusType status;
 
     public Long getId() {
         return id;
@@ -119,5 +122,13 @@ public class FileEntity {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public StatusType getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusType status) {
+        this.status = status;
     }
 }

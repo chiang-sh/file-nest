@@ -1,5 +1,7 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.file.dto.UploadUrlRequest;
+import io.github.chiang_sh.file_nest.file.dto.UploadUrlResponse;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.minio.errors.MinioException;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +23,7 @@ import java.util.UUID;
 @Tag(name = "File manipulation")
 public class FileController {
 
-    private FileService fileService;
+    private final FileService fileService;
 
     @Autowired
     public FileController(FileService fileService) {
@@ -35,7 +37,7 @@ public class FileController {
         return fileService.getChildren(securityUser.getUsername(), parentUuid);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    //@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestParam UUID parentUuid,
@@ -49,5 +51,17 @@ public class FileController {
         } catch (MinioException | IOException e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @PostMapping
+    public ResponseEntity<UploadUrlResponse> presignedUrl(
+            @AuthenticationPrincipal SecurityUser securityUser, @RequestBody UploadUrlRequest body)
+            throws MinioException {
+        FileEntity entity =
+                fileService.createFile(
+                        securityUser.getUsername(), body.filename(), body.parentUuid());
+        String url = fileService.uploadUrl(entity.getStoragePath());
+        UploadUrlResponse response = new UploadUrlResponse(entity.getUuid(), url);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
