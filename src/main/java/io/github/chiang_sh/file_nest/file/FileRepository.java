@@ -18,7 +18,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             FROM FilePermissionEntity fp
             JOIN fp.file f
             WHERE f.folder IS NULL
-            AND fp.user.id = :userId""")
+            AND fp.user.id = :userId
+            AND f.status = StatusType.COMPLETED""")
     List<FileResponse> findRootFiles(@Param("userId") Long userId);
 
     @Query(
@@ -27,7 +28,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             FROM FilePermissionEntity fp
             JOIN fp.file f
             WHERE f.folder.uuid = :folderUuid
-            AND fp.user.id = :userId""")
+            AND fp.user.id = :userId
+            AND f.status = StatusType.COMPLETED""")
     List<FileResponse> findChildrenFiles(
             @Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
 
