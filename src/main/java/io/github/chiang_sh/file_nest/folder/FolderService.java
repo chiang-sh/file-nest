@@ -99,9 +99,18 @@ public class FolderService {
                 .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
     }
 
-    public FolderResponse update(String username, UUID uuid, String name) {
+    public FolderResponse update(String username, UUID uuid, UUID parentUuid, String name) {
         FolderEntity folder = getAccessibleFolder(username, uuid);
-        folder.setName(name);
+        if (parentUuid != null) {
+            if (parentUuid.equals(uuid)) {
+                throw new IllegalArgumentException("The parent UUID must not be the same as the resource UUID.");
+            }
+            FolderEntity parent = getAccessibleFolder(username, parentUuid);
+            folder.setParentFolder(parent);
+        }
+        if (name != null && !name.isEmpty()) {
+            folder.setName(name);
+        }
         folderRepository.save(folder);
         return FolderResponse.from(folder);
     }

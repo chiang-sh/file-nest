@@ -2,7 +2,6 @@ package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.common.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.CreateFolderRequest;
-import io.github.chiang_sh.file_nest.folder.dto.DeleteFolderRequest;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
@@ -55,24 +54,19 @@ public class FolderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping
+    @PatchMapping("/{folderUuid}")
     public FolderResponse updateFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
+            @PathVariable UUID folderUuid,
             @RequestBody UpdateFolderRequest body) {
-        if (body.uuid() == null || body.name() == null || body.name().isEmpty()) {
-            throw new IllegalArgumentException("The argument must not be null.");
-        }
-        return folderService.update(securityUser.getUsername(), body.uuid(), body.name());
+        return folderService.update(
+                securityUser.getUsername(), folderUuid, body.parentUuid(), body.name());
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{folderUuid}")
     public ResponseEntity<Void> deleteFolder(
-            @AuthenticationPrincipal SecurityUser securityUser,
-            @RequestBody DeleteFolderRequest body) {
-        if (body.uuid() == null) {
-            throw new IllegalArgumentException("The argument must not be null.");
-        }
-        folderService.delete(securityUser.getUsername(), body.uuid());
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid) {
+        folderService.delete(securityUser.getUsername(), folderUuid);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
