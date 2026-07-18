@@ -134,11 +134,10 @@ public class FileService {
         }
         return filePermissionRepository
                 .findByUserIdAndFileId(user.getId(), file.getId())
-                .orElseThrow(
-                        () -> new AccessDeniedException("Not allowed to access the file: " + uuid));
+                .orElseThrow(() -> new AccessDeniedException("Access denied: " + uuid));
     }
 
-    public FileResponse updateInfo(String username, UUID uuid, UUID folderUuid , String filename) {
+    public FileResponse updateInfo(String username, UUID uuid, UUID folderUuid, String filename) {
         FilePermissionEntity permission = getAccessiblePermission(username, uuid);
         FileEntity file = permission.getFile();
         if (folderUuid != null) {
@@ -150,5 +149,14 @@ public class FileService {
         }
         fileRepository.save(file);
         return FileResponse.from(file, permission);
+    }
+
+    public void delete(String username, UUID uuid) {
+        FilePermissionEntity permission = getAccessiblePermission(username, uuid);
+        if (permission.getPermission().equals(FilePermissionType.READ)) {
+            throw new AccessDeniedException("Insufficient permissions to delete this resource.");
+        }
+        FileEntity file = permission.getFile();
+        fileRepository.delete(file);
     }
 }

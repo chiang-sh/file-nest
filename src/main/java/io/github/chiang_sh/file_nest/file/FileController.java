@@ -70,4 +70,11 @@ public class FileController {
         return fileService.updateInfo(
                 securityUser.getUsername(), fileUuid, body.folderUuid(), body.filename());
     }
+
+    @DeleteMapping("/{fileUuid}")
+    public ResponseEntity<Void> deleteFile(
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid) {
+        fileService.delete(securityUser.getUsername(), fileUuid);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
