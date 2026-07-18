@@ -1,8 +1,11 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.file.dto.FileResponse;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionRepository;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;
+import io.github.chiang_sh.file_nest.folder.FolderEntity;
+import io.github.chiang_sh.file_nest.folder.FolderService;
 import io.github.chiang_sh.file_nest.minio.MinioProperties;
 import io.github.chiang_sh.file_nest.user.UserEntity;
 import io.github.chiang_sh.file_nest.user.UserRepository;
@@ -26,6 +29,7 @@ public class FileService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final FilePermissionRepository filePermissionRepository;
+    private final FolderService folderService;
     private final MinioClient minioClient;
     private final MinioProperties properties;
 
@@ -34,11 +38,13 @@ public class FileService {
             UserRepository userRepository,
             FileRepository fileRepository,
             FilePermissionRepository filePermissionRepository,
+            FolderService folderService,
             MinioClient minioClient,
             MinioProperties properties) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.filePermissionRepository = filePermissionRepository;
+        this.folderService = folderService;
         this.minioClient = minioClient;
         this.properties = properties;
     }
@@ -113,7 +119,7 @@ public class FileService {
         fileRepository.save(entity);
     }
 
-    public FileEntity getAccessibleFile(String username, UUID uuid) {
+    public FilePermissionEntity getAccessiblePermission(String username, UUID uuid) {
         UserEntity user =
                 userRepository
                         .findByUsername(username)
@@ -126,11 +132,23 @@ public class FileService {
         if (!file.getStatus().equals(StatusType.COMPLETED)) {
             throw new IllegalStateException("File " + uuid + " upload is not completed.");
         }
-        filePermissionRepository
+        return filePermissionRepository
                 .findByUserIdAndFileId(user.getId(), file.getId())
                 .orElseThrow(
                         () -> new AccessDeniedException("Not allowed to access the file: " + uuid));
-        ;
-        return file;
+    }
+
+    public FileResponse updateInfo(String username, UUID uuid, UUID folderUuid , String filename) {
+        FilePermissionEntity permission = getAccessiblePermission(username, uuid);
+        FileEntity file = permission.getFile();
+        if (folderUuid != null) {
+            FolderEntity folder = folderService.getAccessibleFolder(username, folderUuid);
+            file.setFolder(folder);
+        }
+        if (filename != null && !filename.isEmpty()) {
+            file.setName(filename);
+        }
+        fileRepository.save(file);
+        return FileResponse.from(file, permission);
     }
 }

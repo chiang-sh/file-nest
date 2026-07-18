@@ -88,31 +88,26 @@ public class FolderService {
         return FolderResponse.from(newFolder);
     }
 
-    public FolderResponse update(String username, UUID uuid, String name) {
+    public FolderEntity getAccessibleFolder(String username, UUID uuid) {
         UserEntity user =
                 userRepository
                         .findByUsername(username)
                         .orElseThrow(
                                 () -> new NoSuchElementException("User not exist: " + username));
-        FolderEntity folder =
-                folderRepository
-                        .findByUuidAndOwnerId(uuid, user.getId())
-                        .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
+        return folderRepository
+                .findByUuidAndOwnerId(uuid, user.getId())
+                .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
+    }
+
+    public FolderResponse update(String username, UUID uuid, String name) {
+        FolderEntity folder = getAccessibleFolder(username, uuid);
         folder.setName(name);
         folderRepository.save(folder);
         return FolderResponse.from(folder);
     }
 
     public void delete(String username, UUID uuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
-        FolderEntity folder =
-                folderRepository
-                        .findByUuidAndOwnerId(uuid, user.getId())
-                        .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
+        FolderEntity folder = getAccessibleFolder(username, uuid);
         folderRepository.delete(folder);
     }
 }

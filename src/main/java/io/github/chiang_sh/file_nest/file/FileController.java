@@ -1,7 +1,10 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.file.dto.FileResponse;
+import io.github.chiang_sh.file_nest.file.dto.UpdateFileRequest;
 import io.github.chiang_sh.file_nest.file.dto.UploadUrlRequest;
 import io.github.chiang_sh.file_nest.file.dto.UploadUrlResponse;
+import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.minio.Http;
 import io.minio.errors.MinioException;
@@ -33,7 +36,7 @@ public class FileController {
             throws MinioException {
         FileEntity entity =
                 fileService.createFile(
-                        securityUser.getUsername(), body.filename(), body.parentUuid());
+                        securityUser.getUsername(), body.filename(), body.folderUuid());
         String url = fileService.presignedUrl(entity.getStoragePath(), Http.Method.PUT, 5);
         UploadUrlResponse response = new UploadUrlResponse(entity.getUuid(), url);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -53,7 +56,18 @@ public class FileController {
     public String downloadUrl(
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid)
             throws MinioException {
-        FileEntity entity = fileService.getAccessibleFile(securityUser.getUsername(), fileUuid);
-        return fileService.presignedUrl(entity.getStoragePath(), Http.Method.GET);
+        FilePermissionEntity permission =
+                fileService.getAccessiblePermission(securityUser.getUsername(), fileUuid);
+        FileEntity file = permission.getFile();
+        return fileService.presignedUrl(file.getStoragePath(), Http.Method.GET);
+    }
+
+    @PatchMapping("/{fileUuid}")
+    public FileResponse updateInfo(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @PathVariable UUID fileUuid,
+            @RequestBody UpdateFileRequest body) {
+        return fileService.updateInfo(
+                securityUser.getUsername(), fileUuid, body.folderUuid(), body.filename());
     }
 }
