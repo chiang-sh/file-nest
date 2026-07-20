@@ -35,8 +35,7 @@ public class FileController {
             @AuthenticationPrincipal SecurityUser securityUser, @RequestBody UploadUrlRequest body)
             throws MinioException {
         FileEntity entity =
-                fileService.createFile(
-                        securityUser.getUsername(), body.filename(), body.folderUuid());
+                fileService.createFile(securityUser.getId(), body.filename(), body.folderUuid());
         String url = fileService.presignedUrl(entity.getStoragePath(), Http.Method.PUT, 5);
         UploadUrlResponse response = new UploadUrlResponse(entity.getUuid(), url);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -57,7 +56,7 @@ public class FileController {
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid)
             throws MinioException {
         FilePermissionEntity permission =
-                fileService.getAccessiblePermission(securityUser.getUsername(), fileUuid);
+                fileService.getAccessiblePermission(securityUser.getId(), fileUuid);
         FileEntity file = permission.getFile();
         return fileService.presignedUrl(file.getStoragePath(), Http.Method.GET);
     }
@@ -68,13 +67,14 @@ public class FileController {
             @PathVariable UUID fileUuid,
             @RequestBody UpdateFileRequest body) {
         return fileService.updateInfo(
-                securityUser.getUsername(), fileUuid, body.folderUuid(), body.filename());
+                securityUser.getId(), fileUuid, body.folderUuid(), body.filename());
     }
 
     @DeleteMapping("/{fileUuid}")
     public ResponseEntity<Void> deleteFile(
-            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid) {
-        fileService.delete(securityUser.getUsername(), fileUuid);
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid)
+            throws MinioException {
+        fileService.delete(securityUser.getId(), fileUuid);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

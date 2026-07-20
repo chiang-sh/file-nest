@@ -5,9 +5,8 @@ import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionRepository;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;
 import io.github.chiang_sh.file_nest.folder.FolderEntity;
-import io.github.chiang_sh.file_nest.folder.FolderService;
+import io.github.chiang_sh.file_nest.folder.FolderRepository;
 import io.github.chiang_sh.file_nest.minio.MinioProperties;
-import io.github.chiang_sh.file_nest.user.UserEntity;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.*;
 import io.minio.errors.MinioException;
@@ -29,7 +28,7 @@ public class FileService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final FilePermissionRepository filePermissionRepository;
-    private final FolderService folderService;
+    private final FolderRepository folderRepository;
     private final MinioClient minioClient;
     private final MinioProperties properties;
 
@@ -38,28 +37,23 @@ public class FileService {
             UserRepository userRepository,
             FileRepository fileRepository,
             FilePermissionRepository filePermissionRepository,
-            FolderService folderService,
+            FolderRepository folderRepository,
             MinioClient minioClient,
             MinioProperties properties) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.filePermissionRepository = filePermissionRepository;
-        this.folderService = folderService;
+        this.folderRepository = folderRepository;
         this.minioClient = minioClient;
         this.properties = properties;
     }
 
-    public FileEntity createFile(String username, String originalFilename, UUID parentUuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
+    public FileEntity createFile(Long userId, String originalFilename, UUID parentUuid) {
         UUID uuid = UUID.randomUUID();
         String filename = FilenameUtils.getName(originalFilename);
         String extension = FilenameUtils.getExtension(originalFilename);
         String minioFilename = uuid + "." + extension;
-        String objectKey = String.join("/", "users", Long.toString(user.getId()), minioFilename);
+        String objectKey = String.join("/", "users", Long.toString(userId), minioFilename);
 
         FileEntity file = new FileEntity();
         file.setUuid(uuid);
@@ -78,7 +72,7 @@ public class FileService {
         fileRepository.save(file);
 
         FilePermissionEntity permission = new FilePermissionEntity();
-        permission.setUser(user);
+        permission.setUser(userRepository.getReferenceById(userId));
         permission.setFile(file);
         permission.setPermission(FilePermissionType.OWNER);
         filePermissionRepository.save(permission);
@@ -119,12 +113,7 @@ public class FileService {
         fileRepository.save(entity);
     }
 
-    public FilePermissionEntity getAccessiblePermission(String username, UUID uuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
+    public FilePermissionEntity getAccessiblePermission(Long userId, UUID uuid) {
         FileEntity file =
                 fileRepository
                         .findByUuid(uuid)
@@ -133,15 +122,17 @@ public class FileService {
             throw new IllegalStateException("File " + uuid + " upload is not completed.");
         }
         return filePermissionRepository
-                .findByUserIdAndFileId(user.getId(), file.getId())
+                .findByUserIdAndFileId(userId, file.getId())
                 .orElseThrow(() -> new AccessDeniedException("Access denied: " + uuid));
     }
 
-    public FileResponse updateInfo(String username, UUID uuid, UUID folderUuid, String filename) {
-        FilePermissionEntity permission = getAccessiblePermission(username, uuid);
+    public FileResponse updateInfo(Long userId, UUID uuid, UUID folderUuid, String filename) {
+        FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
         FileEntity file = permission.getFile();
         if (folderUuid != null) {
-            FolderEntity folder = folderService.getAccessibleFolder(username, folderUuid);
+            FolderEntity folder = folderRepository
+                    .findByUuidAndOwnerId(folderUuid, userId)
+                    .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + folderUuid));
             file.setFolder(folder);
         }
         if (filename != null && !filename.isEmpty()) {

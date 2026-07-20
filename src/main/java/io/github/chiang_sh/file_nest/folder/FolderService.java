@@ -34,49 +34,33 @@ public class FolderService {
         this.folderRepository = folderRepository;
     }
 
-    public List<FileSystemDto> getChildren(String username) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
-        List<FolderResponse> folders = folderRepository.findRootFolders(user.getId());
-        List<FileResponse> files = fileRepository.findRootFiles(user.getId());
+    public List<FileSystemDto> getChildren(Long userId) {
+        List<FolderResponse> folders = folderRepository.findRootFolders(userId);
+        List<FileResponse> files = fileRepository.findRootFiles(userId);
         List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
         children.addAll(folders);
         children.addAll(files);
         return children;
     }
 
-    public List<FileSystemDto> getChildren(String username, UUID folderUuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
-        List<FolderResponse> folders =
-                folderRepository.findChildrenFolders(user.getId(), folderUuid);
-        List<FileResponse> files = fileRepository.findChildrenFiles(user.getId(), folderUuid);
+    public List<FileSystemDto> getChildren(Long userId, UUID folderUuid) {
+        List<FolderResponse> folders = folderRepository.findChildrenFolders(userId, folderUuid);
+        List<FileResponse> files = fileRepository.findChildrenFiles(userId, folderUuid);
         List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
         children.addAll(folders);
         children.addAll(files);
         return children;
     }
 
-    public FolderResponse create(String username, String name, UUID parentUuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
+    public FolderResponse create(Long userId, String name, UUID parentUuid) {
         FolderEntity newFolder = new FolderEntity();
         newFolder.setName(name);
-        newFolder.setOwner(user);
+        newFolder.setOwner(userRepository.getReferenceById(userId));
 
         if (parentUuid != null) {
             FolderEntity parent =
                     folderRepository
-                            .findByUuidAndOwnerId(parentUuid, user.getId())
+                            .findByUuidAndOwnerId(parentUuid, userId)
                             .orElseThrow(
                                     () ->
                                             new NoSuchElementException(
@@ -88,24 +72,23 @@ public class FolderService {
         return FolderResponse.from(newFolder);
     }
 
-    public FolderEntity getAccessibleFolder(String username, UUID uuid) {
-        UserEntity user =
-                userRepository
-                        .findByUsername(username)
-                        .orElseThrow(
-                                () -> new NoSuchElementException("User not exist: " + username));
-        return folderRepository
-                .findByUuidAndOwnerId(uuid, user.getId())
-                .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
-    }
-
-    public FolderResponse update(String username, UUID uuid, UUID parentUuid, String name) {
-        FolderEntity folder = getAccessibleFolder(username, uuid);
+    public FolderResponse update(Long userId, UUID uuid, UUID parentUuid, String name) {
+        FolderEntity folder =
+                folderRepository
+                        .findByUuidAndOwnerId(uuid, userId)
+                        .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
         if (parentUuid != null) {
             if (parentUuid.equals(uuid)) {
-                throw new IllegalArgumentException("The parent UUID must not be the same as the resource UUID.");
+                throw new IllegalArgumentException(
+                        "The parent UUID must not be the same as the resource UUID.");
             }
-            FolderEntity parent = getAccessibleFolder(username, parentUuid);
+            FolderEntity parent =
+                    folderRepository
+                            .findByUuidAndOwnerId(parentUuid, userId)
+                            .orElseThrow(
+                                    () ->
+                                            new NoSuchElementException(
+                                                    "Folder not exist: " + parentUuid));
             folder.setParentFolder(parent);
         }
         if (name != null && !name.isEmpty()) {

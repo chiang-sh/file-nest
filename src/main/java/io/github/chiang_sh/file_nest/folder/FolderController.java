@@ -37,9 +37,9 @@ public class FolderController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (folderUuid.equals(ROOT)) {
-            return folderService.getChildren(securityUser.getUsername());
+            return folderService.getChildren(securityUser.getId());
         }
-        return folderService.getChildren(securityUser.getUsername(), UUID.fromString(folderUuid));
+        return folderService.getChildren(securityUser.getId(), UUID.fromString(folderUuid));
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class FolderController {
             throw new IllegalArgumentException("The argument must not be null.");
         }
         FolderResponse response =
-                folderService.create(securityUser.getUsername(), body.name(), body.parentUuid());
+                folderService.create(securityUser.getId(), body.name(), body.parentUuid());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -60,13 +60,13 @@ public class FolderController {
             @PathVariable UUID folderUuid,
             @RequestBody UpdateFolderRequest body) {
         return folderService.update(
-                securityUser.getUsername(), folderUuid, body.parentUuid(), body.name());
+                securityUser.getId(), folderUuid, body.parentUuid(), body.name());
     }
 
     @DeleteMapping("/{folderUuid}")
     public ResponseEntity<Void> deleteFolder(
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid) {
-        folderService.delete(securityUser.getUsername(), folderUuid);
+        folderService.delete(securityUser.getId(), folderUuid);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
