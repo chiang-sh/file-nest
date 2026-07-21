@@ -1,6 +1,5 @@
 package io.github.chiang_sh.file_nest.file;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,9 +19,8 @@ public class FileEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Generated(event = EventType.INSERT)
     @ColumnDefault("gen_random_uuid()")
-    @Column(name = "uuid", nullable = false, insertable = false, updatable = false)
+    @Column(name = "uuid", nullable = false, updatable = false)
     private UUID uuid;
 
     @Size(max = 255)
