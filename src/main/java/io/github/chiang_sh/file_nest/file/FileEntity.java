@@ -1,6 +1,5 @@
 package io.github.chiang_sh.file_nest.file;
 
-import io.github.chiang_sh.file_nest.folder.FolderEntity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,8 +7,6 @@ import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.generator.EventType;
 
 import java.time.OffsetDateTime;
@@ -41,11 +38,6 @@ public class FileEntity {
     @Size(max = 100)
     @Column(name = "content_type", length = 100)
     private String contentType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "folder_id")
-    private FolderEntity folder;
 
     @Column(name = "size")
     private Long size;
@@ -98,14 +90,6 @@ public class FileEntity {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
-    }
-
-    public FolderEntity getFolder() {
-        return folder;
-    }
-
-    public void setFolder(FolderEntity folder) {
-        this.folder = folder;
     }
 
     public Long getSize() {

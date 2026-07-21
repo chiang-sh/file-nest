@@ -17,7 +17,7 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             SELECT NEW io.github.chiang_sh.file_nest.file.dto.FileResponse(f.uuid, f.name, f.contentType, f.size, f.createdAt, fp.permission)
             FROM FilePermissionEntity fp
             JOIN fp.file f
-            WHERE f.folder IS NULL
+            WHERE fp.folder IS NULL
             AND fp.user.id = :userId
             AND f.status = StatusType.COMPLETED""")
     List<FileResponse> findRootFiles(@Param("userId") Long userId);
@@ -27,7 +27,7 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             SELECT NEW io.github.chiang_sh.file_nest.file.dto.FileResponse(f.uuid, f.name, f.contentType, f.size, f.createdAt, fp.permission)
             FROM FilePermissionEntity fp
             JOIN fp.file f
-            WHERE f.folder.uuid = :folderUuid
+            WHERE fp.folder.uuid = :folderUuid
             AND fp.user.id = :userId
             AND f.status = StatusType.COMPLETED""")
     List<FileResponse> findChildrenFiles(

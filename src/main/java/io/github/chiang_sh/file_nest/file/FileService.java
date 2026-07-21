@@ -58,15 +58,6 @@ public class FileService {
         FileEntity file = new FileEntity();
         file.setUuid(uuid);
         file.setName(filename);
-        if (parentUuid != null) {
-            FileEntity parent =
-                    fileRepository
-                            .findByUuid(parentUuid)
-                            .orElseThrow(
-                                    () ->
-                                            new NoSuchElementException(
-                                                    "Parent folder not exist: " + parentUuid));
-        }
         file.setStoragePath(objectKey);
         file.setStatus(StatusType.PENDING);
         fileRepository.save(file);
@@ -75,6 +66,16 @@ public class FileService {
         permission.setUser(userRepository.getReferenceById(userId));
         permission.setFile(file);
         permission.setPermission(FilePermissionType.OWNER);
+        if (parentUuid != null) {
+            FolderEntity folder =
+                    folderRepository
+                            .findByUuidAndOwnerId(parentUuid, userId)
+                            .orElseThrow(
+                                    () ->
+                                            new NoSuchElementException(
+                                                    "Folder not exist: " + parentUuid));
+            permission.setFolder(folder);
+        }
         filePermissionRepository.save(permission);
 
         return file;
@@ -130,10 +131,14 @@ public class FileService {
         FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
         FileEntity file = permission.getFile();
         if (folderUuid != null) {
-            FolderEntity folder = folderRepository
-                    .findByUuidAndOwnerId(folderUuid, userId)
-                    .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + folderUuid));
-            file.setFolder(folder);
+            FolderEntity folder =
+                    folderRepository
+                            .findByUuidAndOwnerId(folderUuid, userId)
+                            .orElseThrow(
+                                    () ->
+                                            new NoSuchElementException(
+                                                    "Folder not exist: " + folderUuid));
+            permission.setFolder(folder);
         }
         if (filename != null && !filename.isEmpty()) {
             file.setName(filename);

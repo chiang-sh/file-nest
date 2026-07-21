@@ -1,11 +1,11 @@
 package io.github.chiang_sh.file_nest.file_permission;
 
 import io.github.chiang_sh.file_nest.file.FileEntity;
+import io.github.chiang_sh.file_nest.folder.FolderEntity;
 import io.github.chiang_sh.file_nest.user.UserEntity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Generated;
@@ -45,6 +45,11 @@ public class FilePermissionEntity {
     @Enumerated(EnumType.STRING)
     private FilePermissionType permission;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "folder_id")
+    private FolderEntity folder;
+
     public Long getId() {
         return id;
     }
@@ -83,5 +88,13 @@ public class FilePermissionEntity {
 
     public void setPermission(FilePermissionType permission) {
         this.permission = permission;
+    }
+
+    public FolderEntity getFolder() {
+        return folder;
+    }
+
+    public void setFolder(FolderEntity folder) {
+        this.folder = folder;
     }
 }
