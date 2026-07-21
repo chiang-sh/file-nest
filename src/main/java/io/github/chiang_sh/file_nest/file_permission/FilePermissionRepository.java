@@ -9,5 +9,4 @@ import java.util.Optional;
 
 public interface FilePermissionRepository extends JpaRepository<FilePermissionEntity, Long> {
     Optional<FilePermissionEntity> findByUserIdAndFileId(Long userId, Long fileId);
-    List<FileEntity> findByFolderId(Long folderId);
 }

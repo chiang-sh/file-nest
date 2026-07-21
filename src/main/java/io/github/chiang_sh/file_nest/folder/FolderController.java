@@ -5,6 +5,7 @@ import io.github.chiang_sh.file_nest.folder.dto.CreateFolderRequest;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
+import io.minio.errors.MinioException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,8 @@ public class FolderController {
 
     @DeleteMapping("/{folderUuid}")
     public ResponseEntity<Void> deleteFolder(
-            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid) {
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid)
+            throws MinioException {
         folderService.delete(securityUser.getId(), folderUuid);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

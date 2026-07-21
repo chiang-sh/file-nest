@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -147,12 +148,37 @@ public class FileService {
         return FileResponse.from(file, permission);
     }
 
-    public void delete(String username, UUID uuid) {
-        FilePermissionEntity permission = getAccessiblePermission(username, uuid);
-        if (permission.getPermission().equals(FilePermissionType.READ)) {
-            throw new AccessDeniedException("Insufficient permissions to delete this resource.");
+    public void delete(Long userId, UUID uuid) throws MinioException {
+        FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
+        delete(permission);
+    }
+
+    public void delete(Long userId, List<FileEntity> files) throws MinioException {
+        for (FileEntity file : files) {
+            FilePermissionEntity permission =
+                    filePermissionRepository
+                            .findByUserIdAndFileId(userId, file.getId())
+                            .orElseThrow(
+                                    () ->
+                                            new AccessDeniedException(
+                                                    "Access denied: " + file.getUuid()));
+            delete(permission);
         }
-        FileEntity file = permission.getFile();
-        fileRepository.delete(file);
+    }
+
+    public void delete(FilePermissionEntity permission) throws MinioException {
+        switch (permission.getPermission()) {
+            case READ -> filePermissionRepository.delete(permission);
+            case OWNER, WRITE -> {
+                FileEntity file = permission.getFile();
+                String storagePath = file.getStoragePath();
+                fileRepository.delete(file);
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(properties.getBucketName())
+                                .object(storagePath)
+                                .build());
+            }
+        }
     }
 }

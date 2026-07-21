@@ -34,4 +34,15 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             @Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
 
     Optional<FileEntity> findByUuid(UUID uuid);
+
+    @Query(
+            """
+            SELECT f
+            FROM FilePermissionEntity fp
+            JOIN fp.file f
+            WHERE fp.folder.id = :folderId
+            AND fp.user.id = :userId
+            AND f.status = StatusType.COMPLETED""")
+    List<FileEntity> findByUserIdAndFolderId(
+            @Param("userId") Long userId, @Param("folderId") Long folderId);
 }
