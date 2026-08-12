@@ -6,8 +6,6 @@ This is a backend project for a file management system.
 
 This project provides hierarchical folder organization and role-based file sharing and retrieval.
 
-Users can create their own folder and file hierarchies. Each user's hierarchy is independent and only affects their own file organization; it does not affect other users. Users can share files with other users, but folders cannot be shared.
-
 There are three types of file permissions: **OWNER**, **WRITE**, and **READ**, with the following allowed operations:
 
 |Permission|OWNER|WRITE|READ|
@@ -18,6 +16,8 @@ There are three types of file permissions: **OWNER**, **WRITE**, and **READ**, w
 |Share|v|x|x|
 |Revoke other's access|v|x|x|
 |Remove own access|v|v|v|
+
+Folder records are user-specific, so each user's folder hierarchy is independent and does not affect other users. Each uploaded file has a single file record, regardless of how many users it is shared with. Files are displayed in each user's file list based on the permissions assigned to that user in the permission table.
 
 The project uses **MinIO** as the file storage platform. File upload and download operations use MinIO presigned URLs.
 
@@ -57,7 +57,7 @@ The registration function has not been implemented yet. For testing purposes, ad
 To test the APIs, open the Swagger UI:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://{host}:{port}/swagger-ui/index.html
 ```
 
 Use the login API to generate a JWT token, then click the Authorize button in the upper-right corner of Swagger UI and paste the token there.
