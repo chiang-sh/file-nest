@@ -70,9 +70,14 @@ public class FilePermissionService {
 
     public FilePermissionResponse update(
             Long ownerId, UUID fileUuid, UUID permissionUuid, FilePermissionType permissionType) {
-        filePermissionRepository
-                .findByUserIdAndFileUuidAndPermission(ownerId, fileUuid, FilePermissionType.OWNER)
-                .orElseThrow(() -> new AccessDeniedException("Access denied: " + fileUuid));
+        FilePermissionEntity ownerPermission =
+                filePermissionRepository
+                        .findByUserIdAndFileUuidAndPermission(
+                                ownerId, fileUuid, FilePermissionType.OWNER)
+                        .orElseThrow(() -> new AccessDeniedException("Access denied: " + fileUuid));
+        if (ownerPermission.getUuid().equals(permissionUuid)) {
+            throw new IllegalArgumentException("Cannot change OWNER permission.");
+        }
         if (permissionType.equals(FilePermissionType.OWNER)) {
             throw new IllegalArgumentException("Cannot assign OWNER permission.");
         }
