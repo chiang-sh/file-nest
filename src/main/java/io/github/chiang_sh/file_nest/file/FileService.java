@@ -97,31 +97,41 @@ public class FileService {
                         .build());
     }
 
-    public void confirmUpload(UUID uuid) throws MinioException {
-        FileEntity entity =
-                fileRepository
-                        .findByUuid(uuid)
-                        .orElseThrow(() -> new NoSuchElementException("File not exist: " + uuid));
+    public void confirmUpload(Long userId, UUID uuid) throws MinioException {
+        FilePermissionEntity permission = getAccessiblePermission(userId, uuid, StatusType.PENDING);
+        FileEntity file = permission.getFile();
 
         StatObjectResponse stat =
                 minioClient.statObject(
                         StatObjectArgs.builder()
                                 .bucket(properties.getBucketName())
-                                .object(entity.getStoragePath())
+                                .object(file.getStoragePath())
                                 .build());
-        entity.setContentType(stat.contentType());
-        entity.setSize(stat.size());
-        entity.setStatus(StatusType.COMPLETED);
-        fileRepository.save(entity);
+        file.setContentType(stat.contentType());
+        file.setSize(stat.size());
+        file.setStatus(StatusType.COMPLETED);
+        fileRepository.save(file);
     }
 
     public FilePermissionEntity getAccessiblePermission(Long userId, UUID uuid) {
+        return getAccessiblePermission(userId, uuid, StatusType.COMPLETED);
+    }
+
+    public FilePermissionEntity getAccessiblePermission(
+            Long userId, UUID uuid, StatusType statusType) {
         FileEntity file =
                 fileRepository
                         .findByUuid(uuid)
                         .orElseThrow(() -> new NoSuchElementException("File not exist: " + uuid));
-        if (!file.getStatus().equals(StatusType.COMPLETED)) {
-            throw new IllegalStateException("File " + uuid + " upload is not completed.");
+        if (!file.getStatus().equals(statusType)) {
+            throw new IllegalStateException(
+                    "File "
+                            + uuid
+                            + " upload status is "
+                            + file.getStatus().name()
+                            + ", not "
+                            + statusType.name()
+                            + ".");
         }
         return filePermissionRepository
                 .findByUserIdAndFileId(userId, file.getId())

@@ -45,7 +45,7 @@ public class FileController {
     public void confirmUpload(
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid) {
         try {
-            fileService.confirmUpload(fileUuid);
+            fileService.confirmUpload(securityUser.getId(), fileUuid);
         } catch (MinioException e) {
             throw new IllegalStateException("File " + fileUuid + " upload is not completed.");
         }
