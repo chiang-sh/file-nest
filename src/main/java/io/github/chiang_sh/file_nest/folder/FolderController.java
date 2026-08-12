@@ -6,6 +6,7 @@ import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.minio.errors.MinioException;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class FolderController {
     }
 
     @GetMapping("/{folderUuid}/children")
+    @Operation(description = "Use \"root\" as the folderUuid for the root folder.")
     public List<FileSystemDto> getChildren(
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable String folderUuid) {
         if (folderUuid == null) {
