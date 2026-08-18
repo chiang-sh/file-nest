@@ -36,18 +36,47 @@ public class FolderService {
         this.fileService = fileService;
     }
 
-    public List<FileSystemDto> getChildren(Long userId) {
-        List<FolderResponse> folders = folderRepository.findRootFolders(userId);
-        List<FileResponse> files = fileRepository.findRootFiles(userId);
-        List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
-        children.addAll(folders);
-        children.addAll(files);
-        return children;
+    public List<FileSystemDto> getChildren(Long userId, int pageNumber, int pageSize) {
+        return getChildren(userId, null, pageNumber, pageSize);
     }
 
-    public List<FileSystemDto> getChildren(Long userId, UUID folderUuid) {
-        List<FolderResponse> folders = folderRepository.findChildrenFolders(userId, folderUuid);
-        List<FileResponse> files = fileRepository.findChildrenFiles(userId, folderUuid);
+    public List<FileSystemDto> getChildren(
+            Long userId, UUID folderUuid, int pageNumber, int pageSize) {
+        int folderCount = folderRepository.countByOwnerId(userId);
+        int totalFolderPageNumber = Math.ceilDiv(folderCount, pageSize);
+        List<FolderResponse> folders = List.of();
+        List<FileResponse> files = List.of();
+
+        // Paginate folders first, then files.
+        if (pageNumber < totalFolderPageNumber) {
+            int offset = (pageNumber - 1) * pageSize;
+            folders =
+                    folderUuid == null
+                            ? folderRepository.findRootFolders(userId, pageSize, offset)
+                            : folderRepository.findChildrenFolders(
+                                    userId, folderUuid, pageSize, offset);
+            ;
+        } else if (pageNumber == totalFolderPageNumber) {
+            int folderOffset = (pageNumber - 1) * pageSize;
+            folders =
+                    folderUuid == null
+                            ? folderRepository.findRootFolders(userId, pageSize, folderOffset)
+                            : folderRepository.findChildrenFolders(
+                                    userId, folderUuid, pageSize, folderOffset);
+            int filePageSize = pageSize - folders.size();
+            files =
+                    folderUuid == null
+                            ? fileRepository.findRootFiles(userId, filePageSize, 0)
+                            : fileRepository.findChildrenFiles(userId, folderUuid, filePageSize, 0);
+        } else {
+            int offset = (pageNumber - 1) * pageSize - folderCount;
+            files =
+                    folderUuid == null
+                            ? fileRepository.findRootFiles(userId, pageSize, offset)
+                            : fileRepository.findChildrenFiles(
+                                    userId, folderUuid, pageSize, offset);
+        }
+
         List<FileSystemDto> children = new ArrayList<>(folders.size() + files.size());
         children.addAll(folders);
         children.addAll(files);

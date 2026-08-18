@@ -20,19 +20,22 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             JOIN fp.file f
             WHERE fp.folder IS NULL
             AND fp.user.id = :userId
-            AND f.status = StatusType.COMPLETED""")
-    List<FileResponse> findRootFiles(@Param("userId") Long userId);
+            AND f.status = StatusType.COMPLETED
+            ORDER BY f.createdAt
+            LIMIT :pageSize OFFSET :offset""")
+    List<FileResponse> findRootFiles(Long userId, int pageSize, int offset);
 
     @Query(
             """
             SELECT NEW io.github.chiang_sh.file_nest.file.dto.FileResponse(f.uuid, f.name, f.contentType, f.size, f.createdAt, fp.permission)
             FROM FilePermissionEntity fp
             JOIN fp.file f
-            WHERE fp.folder.uuid = :folderUuid
+            WHERE fp.folder.uuid = :parentUuid
             AND fp.user.id = :userId
-            AND f.status = StatusType.COMPLETED""")
-    List<FileResponse> findChildrenFiles(
-            @Param("userId") Long userId, @Param("folderUuid") UUID parentUuid);
+            AND f.status = StatusType.COMPLETED
+            ORDER BY f.createdAt
+            LIMIT :pageSize OFFSET :offset""")
+    List<FileResponse> findChildrenFiles(Long userId, UUID parentUuid, int pageSize, int offset);
 
     Optional<FileEntity> findByUuid(UUID uuid);
 

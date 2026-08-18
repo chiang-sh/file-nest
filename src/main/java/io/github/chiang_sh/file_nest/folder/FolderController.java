@@ -7,6 +7,7 @@ import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.minio.errors.MinioException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +36,18 @@ public class FolderController {
     @GetMapping("/{folderUuid}/children")
     @Operation(description = "Use \"root\" as the folderUuid for the root folder.")
     public List<FileSystemDto> getChildren(
-            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable String folderUuid) {
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @PathVariable String folderUuid,
+            @RequestParam @Parameter(description = "Start from 1.") int pageNumber,
+            @RequestParam int pageSize) {
         if (folderUuid == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (folderUuid.equals(ROOT)) {
-            return folderService.getChildren(securityUser.getId());
+            return folderService.getChildren(securityUser.getId(), pageNumber, pageSize);
         }
-        return folderService.getChildren(securityUser.getId(), UUID.fromString(folderUuid));
+        return folderService.getChildren(
+                securityUser.getId(), UUID.fromString(folderUuid), pageNumber, pageSize);
     }
 
     @PostMapping
