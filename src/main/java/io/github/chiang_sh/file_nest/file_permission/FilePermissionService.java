@@ -1,6 +1,7 @@
 package io.github.chiang_sh.file_nest.file_permission;
 
 import io.github.chiang_sh.file_nest.file.FileRepository;
+import io.github.chiang_sh.file_nest.file.StatusType;
 import io.github.chiang_sh.file_nest.file_permission.dto.FilePermissionResponse;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.*;

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,4 +46,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             AND f.status = StatusType.COMPLETED""")
     List<FileEntity> findByUserIdAndFolderId(
             @Param("userId") Long userId, @Param("folderId") Long folderId);
+
+    int deleteByStatusAndCreatedAtBefore(StatusType status, OffsetDateTime datetime);
 }

@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -190,5 +191,12 @@ public class FileService {
                                 .build());
             }
         }
+    }
+
+    public int deletePending() {
+        // Upload presigned URL expires after 5 minutes.
+        // Use a 10-minutes buffer since the file record is created before the presigned URL.
+        OffsetDateTime expired = OffsetDateTime.now().minusMinutes(10);
+        return fileRepository.deleteByStatusAndCreatedAtBefore(StatusType.PENDING, expired);
     }
 }
