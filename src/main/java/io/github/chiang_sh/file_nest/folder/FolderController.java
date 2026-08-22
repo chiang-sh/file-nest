@@ -1,7 +1,7 @@
 package io.github.chiang_sh.file_nest.folder;
 
-import io.github.chiang_sh.file_nest.common.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.CreateFolderRequest;
+import io.github.chiang_sh.file_nest.folder.dto.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.folder.dto.UpdateFolderRequest;
 import io.github.chiang_sh.file_nest.security.SecurityUser;

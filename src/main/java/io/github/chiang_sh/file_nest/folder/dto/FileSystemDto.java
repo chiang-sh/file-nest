@@ -1,4 +1,4 @@
-package io.github.chiang_sh.file_nest.common;
+package io.github.chiang_sh.file_nest.folder.dto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

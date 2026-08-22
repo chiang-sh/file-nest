@@ -1,6 +1,6 @@
 package io.github.chiang_sh.file_nest.file.dto;
 
-import io.github.chiang_sh.file_nest.common.FileSystemDto;
+import io.github.chiang_sh.file_nest.folder.dto.FileSystemDto;
 import io.github.chiang_sh.file_nest.file.FileEntity;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;

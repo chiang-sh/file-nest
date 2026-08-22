@@ -1,10 +1,10 @@
 package io.github.chiang_sh.file_nest.folder;
 
-import io.github.chiang_sh.file_nest.common.FileSystemDto;
 import io.github.chiang_sh.file_nest.file.FileEntity;
 import io.github.chiang_sh.file_nest.file.FileRepository;
 import io.github.chiang_sh.file_nest.file.FileService;
 import io.github.chiang_sh.file_nest.file.dto.FileResponse;
+import io.github.chiang_sh.file_nest.folder.dto.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.errors.MinioException;

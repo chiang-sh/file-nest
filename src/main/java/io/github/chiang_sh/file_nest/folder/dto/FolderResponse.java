@@ -1,6 +1,5 @@
 package io.github.chiang_sh.file_nest.folder.dto;
 
-import io.github.chiang_sh.file_nest.common.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.FolderEntity;
 
 import java.time.OffsetDateTime;
