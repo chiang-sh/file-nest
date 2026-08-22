@@ -12,6 +12,8 @@ import io.minio.*;
 import io.minio.errors.MinioException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FileService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
 
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
@@ -197,6 +201,27 @@ public class FileService {
         // Upload presigned URL expires after 5 minutes.
         // Use a 10-minutes buffer since the file record is created before the presigned URL.
         OffsetDateTime expired = OffsetDateTime.now().minusMinutes(10);
-        return fileRepository.deleteByStatusAndCreatedAtBefore(StatusType.PENDING, expired);
+        List<FileEntity> pendingFiles =
+                fileRepository.findByStatusAndCreatedAtBefore(StatusType.PENDING, expired);
+        int deleteCount = 0;
+        for (FileEntity file : pendingFiles) {
+            try {
+                // Remove the unconfirmed files.
+                String storagePath = file.getStoragePath();
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder()
+                                .bucket(properties.getBucketName())
+                                .object(storagePath)
+                                .build());
+                fileRepository.delete(file);
+                deleteCount++;
+            } catch (MinioException e) {
+                logger.error(
+                        "Failed to remove file: {}. It will be retried in the next job.",
+                        file.getUuid(),
+                        e);
+            }
+        }
+        return deleteCount;
     }
 }

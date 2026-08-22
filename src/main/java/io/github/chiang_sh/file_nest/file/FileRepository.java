@@ -50,5 +50,5 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findByUserIdAndFolderId(
             @Param("userId") Long userId, @Param("folderId") Long folderId);
 
-    int deleteByStatusAndCreatedAtBefore(StatusType status, OffsetDateTime datetime);
+    List<FileEntity> findByStatusAndCreatedAtBefore(StatusType status, OffsetDateTime datetime);
 }
