@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.jspecify.annotations.NullMarked;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,12 +37,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         token -> {
                             if (jwtUtils.validateToken(token)) {
                                 String username = jwtUtils.getUsernameFromToken(token);
-                                UserDetails user = securityService.loadUserByUsername(username);
+                                SecurityUser user = securityService.loadUserByUsername(username);
                                 UsernamePasswordAuthenticationToken authentication =
                                         new UsernamePasswordAuthenticationToken(
                                                 user, null, user.getAuthorities());
                                 SecurityContextHolder.getContext()
                                         .setAuthentication(authentication);
+                                MDC.put("userId", Long.toString(user.getId()));
                             }
                         });
         filterChain.doFilter(request, response);
