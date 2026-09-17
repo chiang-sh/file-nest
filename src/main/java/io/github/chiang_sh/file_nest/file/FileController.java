@@ -75,6 +75,6 @@ public class FileController {
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid)
             throws MinioException {
         fileService.confirmDelete(securityUser.getId(), fileUuid);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

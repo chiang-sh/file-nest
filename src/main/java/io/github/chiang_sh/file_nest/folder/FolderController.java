@@ -76,6 +76,6 @@ public class FolderController {
             @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID folderUuid)
             throws MinioException {
         folderService.delete(securityUser.getId(), folderUuid);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

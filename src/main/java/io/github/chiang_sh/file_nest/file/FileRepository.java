@@ -57,7 +57,7 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
             FROM FileEntity f
             WHERE f.status = :status
             AND f.id > :lastId
-            AND (:datetime IS NULL OR f.createdAt < :datetime)
+            AND (CAST(:datetime AS TIMESTAMP) IS NULL OR f.createdAt < :datetime)
             ORDER BY f.id ASC""")
     List<FileEntity> findCleanupBatch(StatusType status, Long lastId, Pageable pageable, OffsetDateTime datetime);
 }
