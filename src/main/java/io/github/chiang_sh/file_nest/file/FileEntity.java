@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
+@DynamicUpdate
 @Table(name = "files")
 public class FileEntity {
     @Id

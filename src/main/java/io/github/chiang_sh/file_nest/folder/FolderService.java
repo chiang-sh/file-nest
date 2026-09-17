@@ -148,7 +148,7 @@ public class FolderService {
                             subFolder.getId(), folder.getOwner().getId()));
             subFiles.addAll(fileRepository.findByUserIdAndFolderId(userId, subFolder.getId()));
         }
-        fileService.delete(userId, subFiles);
+        fileService.confirmDelete(userId, subFiles);
         folderRepository.delete(folder);
     }
 }

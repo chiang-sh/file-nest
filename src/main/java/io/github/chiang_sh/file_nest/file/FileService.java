@@ -15,6 +15,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -163,12 +164,12 @@ public class FileService {
         return FileResponse.from(file, permission);
     }
 
-    public void delete(Long userId, UUID uuid) throws MinioException {
+    public void confirmDelete(Long userId, UUID uuid) {
         FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
-        delete(permission);
+        confirmDelete(permission);
     }
 
-    public void delete(Long userId, List<FileEntity> files) throws MinioException {
+    public void confirmDelete(Long userId, List<FileEntity> files) {
         for (FileEntity file : files) {
             FilePermissionEntity permission =
                     filePermissionRepository
@@ -177,51 +178,34 @@ public class FileService {
                                     () ->
                                             new AccessDeniedException(
                                                     "Access denied: " + file.getUuid()));
-            delete(permission);
+            confirmDelete(permission);
         }
     }
 
-    public void delete(FilePermissionEntity permission) throws MinioException {
-        switch (permission.getPermission()) {
-            case READ -> filePermissionRepository.delete(permission);
-            case OWNER, WRITE -> {
-                FileEntity file = permission.getFile();
-                String storagePath = file.getStoragePath();
-                fileRepository.delete(file);
-                minioClient.removeObject(
-                        RemoveObjectArgs.builder()
-                                .bucket(properties.getBucketName())
-                                .object(storagePath)
-                                .build());
-            }
+    public void confirmDelete(FilePermissionEntity permission) {
+        if (permission.getPermission() != FilePermissionType.READ) {
+            FileEntity file = permission.getFile();
+            file.setStatus(StatusType.DELETING);
+            fileRepository.save(file);
         }
+        filePermissionRepository.delete(permission);
     }
 
-    public int deletePending() {
-        // Upload presigned URL expires after 5 minutes.
-        // Use a 10-minutes buffer since the file record is created before the presigned URL.
-        OffsetDateTime expired = OffsetDateTime.now().minusMinutes(10);
-        List<FileEntity> pendingFiles =
-                fileRepository.findByStatusAndCreatedAtBefore(StatusType.PENDING, expired);
-        int deleteCount = 0;
-        for (FileEntity file : pendingFiles) {
-            try {
-                // Remove the unconfirmed files.
-                String storagePath = file.getStoragePath();
-                minioClient.removeObject(
-                        RemoveObjectArgs.builder()
-                                .bucket(properties.getBucketName())
-                                .object(storagePath)
-                                .build());
-                fileRepository.delete(file);
-                deleteCount++;
-            } catch (MinioException e) {
-                logger.error(
-                        "Failed to remove file: {}. It will be retried in the next job.",
-                        file.getUuid(),
-                        e);
-            }
-        }
-        return deleteCount;
+    public List<FileEntity> findCleanupFiles(
+            StatusType status, Long lastId, OffsetDateTime datetime) {
+        return fileRepository.findCleanupBatch(status, lastId, PageRequest.of(0, 100), datetime);
+    }
+
+    public void deleteObject(FileEntity file) throws MinioException {
+        String storagePath = file.getStoragePath();
+        minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                        .bucket(properties.getBucketName())
+                        .object(storagePath)
+                        .build());
+    }
+
+    public void deleteRecord(FileEntity file) {
+        fileRepository.delete(file);
     }
 }

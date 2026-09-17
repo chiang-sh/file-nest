@@ -2,6 +2,7 @@ package io.github.chiang_sh.file_nest.file;
 
 import io.github.chiang_sh.file_nest.file.dto.FileResponse;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,5 +51,13 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findByUserIdAndFolderId(
             @Param("userId") Long userId, @Param("folderId") Long folderId);
 
-    List<FileEntity> findByStatusAndCreatedAtBefore(StatusType status, OffsetDateTime datetime);
+    @Query(
+            """
+            SELECT f
+            FROM FileEntity f
+            WHERE f.status = :status
+            AND f.id > :lastId
+            AND (:datetime IS NULL OR f.createdAt < :datetime)
+            ORDER BY f.id ASC""")
+    List<FileEntity> findCleanupBatch(StatusType status, Long lastId, Pageable pageable, OffsetDateTime datetime);
 }

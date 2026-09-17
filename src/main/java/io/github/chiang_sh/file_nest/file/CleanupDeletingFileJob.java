@@ -5,32 +5,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
-public class CleanupPendingFileJob {
+public class CleanupDeletingFileJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(CleanupPendingFileJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(CleanupDeletingFileJob.class);
     private final FileService fileService;
 
-    public CleanupPendingFileJob(FileService fileService) {
+    public CleanupDeletingFileJob(FileService fileService) {
         this.fileService = fileService;
     }
 
-    @Scheduled(cron = "0 0 3 * * *") // Run the job at 3:00 AM every day.
+    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
     public void cleanup() {
-        logger.info("Cleanup pending files job started.");
+        logger.info("Cleanup deleting files job started.");
         Long lastId = 0L;
         int deleteCount = 0;
-
-        // Upload presigned URL expires after 5 minutes.
-        // Use a 10-minutes buffer since the file record is created before the presigned URL.
-        OffsetDateTime expired = OffsetDateTime.now().minusMinutes(10);
-
         while (true) {
             List<FileEntity> files =
-                    fileService.findCleanupFiles(StatusType.PENDING, lastId, expired);
+                    fileService.findCleanupFiles(StatusType.DELETING, lastId, null);
             if (files.isEmpty()) {
                 break;
             }
@@ -40,11 +35,11 @@ public class CleanupPendingFileJob {
                     fileService.deleteRecord(file);
                     deleteCount++;
                 } catch (Exception e) {
-                    logger.error("Failed to clean up pending file {}", file.getUuid(), e);
+                    logger.error("Failed to clean up deleting file {}", file.getUuid(), e);
                 }
             }
             lastId = files.getLast().getId();
         }
-        logger.info("Cleanup pending files job completed. Deleted {} files.", deleteCount);
+        logger.info("Cleanup deleting files job completed. Deleted {} files.", deleteCount);
     }
 }
