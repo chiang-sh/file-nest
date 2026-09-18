@@ -166,24 +166,9 @@ public class FileService {
 
     public void confirmDelete(Long userId, UUID uuid) {
         FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
-        confirmDelete(permission);
-    }
-
-    public void confirmDelete(Long userId, List<FileEntity> files) {
-        for (FileEntity file : files) {
-            FilePermissionEntity permission =
-                    filePermissionRepository
-                            .findByUserIdAndFileId(userId, file.getId())
-                            .orElseThrow(
-                                    () ->
-                                            new AccessDeniedException(
-                                                    "Access denied: " + file.getUuid()));
-            confirmDelete(permission);
-        }
-    }
-
-    public void confirmDelete(FilePermissionEntity permission) {
-        if (permission.getPermission() != FilePermissionType.READ) {
+        // Delete the file record if the permission is OWNER and WRITE.
+        if (permission.getPermission() == FilePermissionType.OWNER
+                || permission.getPermission() == FilePermissionType.WRITE) {
             FileEntity file = permission.getFile();
             file.setStatus(StatusType.DELETING);
             fileRepository.save(file);

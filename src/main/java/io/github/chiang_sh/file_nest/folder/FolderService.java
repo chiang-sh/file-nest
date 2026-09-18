@@ -1,6 +1,5 @@
 package io.github.chiang_sh.file_nest.folder;
 
-import io.github.chiang_sh.file_nest.file.FileEntity;
 import io.github.chiang_sh.file_nest.file.FileRepository;
 import io.github.chiang_sh.file_nest.file.FileService;
 import io.github.chiang_sh.file_nest.file.dto.FileResponse;
@@ -134,21 +133,7 @@ public class FolderService {
                 folderRepository
                         .findByUuidAndOwnerId(uuid, userId)
                         .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
-
-        Queue<FolderEntity> subFolders =
-                new ArrayDeque<>(
-                        folderRepository.findByParentFolderIdAndOwnerId(
-                                folder.getId(), folder.getOwner().getId()));
-        List<FileEntity> subFiles =
-                new ArrayList<>(fileRepository.findByUserIdAndFolderId(userId, folder.getId()));
-        while (!subFolders.isEmpty()) {
-            FolderEntity subFolder = subFolders.poll();
-            subFolders.addAll(
-                    folderRepository.findByParentFolderIdAndOwnerId(
-                            subFolder.getId(), folder.getOwner().getId()));
-            subFiles.addAll(fileRepository.findByUserIdAndFolderId(userId, subFolder.getId()));
-        }
-        fileService.confirmDelete(userId, subFiles);
+        fileRepository.updateDeletingStatus(userId, folder.getId());
         folderRepository.delete(folder);
     }
 }
