@@ -39,8 +39,8 @@ public class FolderController {
             @AuthenticationPrincipal SecurityUser securityUser,
             @PathVariable String folderUuid,
             @RequestParam @Parameter(description = "Start from 1.") int pageNumber,
-            @RequestParam int pageSize) {
-        if (folderUuid == null) {
+            @RequestParam @Parameter(description = "Must be between 1 and 100.") int pageSize) {
+        if (folderUuid == null || pageNumber <= 0 || pageSize < 1 || pageSize > 100) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (folderUuid.equals(ROOT)) {

@@ -1,7 +1,6 @@
 package io.github.chiang_sh.file_nest.folder;
 
 import io.github.chiang_sh.file_nest.file.FileRepository;
-import io.github.chiang_sh.file_nest.file.FileService;
 import io.github.chiang_sh.file_nest.file.dto.FileResponse;
 import io.github.chiang_sh.file_nest.folder.dto.FileSystemDto;
 import io.github.chiang_sh.file_nest.folder.dto.FolderResponse;
@@ -21,18 +20,15 @@ public class FolderService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final FolderRepository folderRepository;
-    private final FileService fileService;
 
     @Autowired
     public FolderService(
             UserRepository userRepository,
             FileRepository fileRepository,
-            FolderRepository folderRepository,
-            FileService fileService) {
+            FolderRepository folderRepository) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.folderRepository = folderRepository;
-        this.fileService = fileService;
     }
 
     public List<FileSystemDto> getChildren(Long userId, int pageNumber, int pageSize) {
@@ -41,14 +37,19 @@ public class FolderService {
 
     public List<FileSystemDto> getChildren(
             Long userId, UUID folderUuid, int pageNumber, int pageSize) {
-        int folderCount = folderRepository.countByOwnerId(userId);
+        int folderCount = folderRepository.countByOwnerIdAndParentFolderUuid(userId, folderUuid);
         int totalFolderPageNumber = Math.ceilDiv(folderCount, pageSize);
         List<FolderResponse> folders = List.of();
         List<FileResponse> files = List.of();
 
+        long rawOffset = ((long) pageNumber - 1) * pageSize;
+        if (rawOffset > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("PageNumber is too large.");
+        }
+
         // Paginate folders first, then files.
         if (pageNumber < totalFolderPageNumber) {
-            int offset = (pageNumber - 1) * pageSize;
+            int offset = (int) rawOffset;
             folders =
                     folderUuid == null
                             ? folderRepository.findRootFolders(userId, pageSize, offset)
@@ -56,7 +57,7 @@ public class FolderService {
                                     userId, folderUuid, pageSize, offset);
             ;
         } else if (pageNumber == totalFolderPageNumber) {
-            int folderOffset = (pageNumber - 1) * pageSize;
+            int folderOffset = (int) rawOffset;
             folders =
                     folderUuid == null
                             ? folderRepository.findRootFolders(userId, pageSize, folderOffset)
@@ -68,7 +69,7 @@ public class FolderService {
                             ? fileRepository.findRootFiles(userId, filePageSize, 0)
                             : fileRepository.findChildrenFiles(userId, folderUuid, filePageSize, 0);
         } else {
-            int offset = (pageNumber - 1) * pageSize - folderCount;
+            int offset = (int) rawOffset - folderCount;
             files =
                     folderUuid == null
                             ? fileRepository.findRootFiles(userId, pageSize, offset)

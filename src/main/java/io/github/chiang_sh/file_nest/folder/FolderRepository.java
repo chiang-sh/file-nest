@@ -17,7 +17,7 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
             FROM FolderEntity f
             WHERE f.parentFolder IS NULL
             AND f.owner.id = :userId
-            ORDER BY f.createdAt
+            ORDER BY f.createdAt, f.id
             LIMIT :pageSize OFFSET :offset""")
     List<FolderResponse> findRootFolders(Long userId, int pageSize, int offset);
 
@@ -27,14 +27,12 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
             FROM FolderEntity f
             WHERE f.parentFolder.uuid = :folderUuid
             AND f.owner.id = :userId
-            ORDER BY f.createdAt
+            ORDER BY f.createdAt, f.id
             LIMIT :pageSize OFFSET :offset""")
     List<FolderResponse> findChildrenFolders(
             Long userId, UUID folderUuid, int pageSize, int offset);
 
     Optional<FolderEntity> findByUuidAndOwnerId(UUID uuid, Long ownerId);
 
-    List<FolderEntity> findByParentFolderIdAndOwnerId(Long parentFolderId, Long ownerId);
-
-    int countByOwnerId(Long ownerId);
+    int countByOwnerIdAndParentFolderUuid(Long ownerId, UUID parentFolderUuid);
 }
