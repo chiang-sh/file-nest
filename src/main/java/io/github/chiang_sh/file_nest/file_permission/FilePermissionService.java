@@ -1,7 +1,6 @@
 package io.github.chiang_sh.file_nest.file_permission;
 
 import io.github.chiang_sh.file_nest.file.FileRepository;
-import io.github.chiang_sh.file_nest.file.StatusType;
 import io.github.chiang_sh.file_nest.file_permission.dto.FilePermissionResponse;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.*;
@@ -45,8 +44,7 @@ public class FilePermissionService {
         filePermissionRepository
                 .findByUserIdAndFileUuidAndPermission(ownerId, fileUuid, FilePermissionType.OWNER)
                 .orElseThrow(() -> new AccessDeniedException("Access denied: " + fileUuid));
-        if (filePermissionRepository.findByFileUuid(fileUuid).stream()
-                .anyMatch(p -> p.username().equals(username))) {
+        if (filePermissionRepository.existsByFileUuidAndUserUsername(fileUuid, username)) {
             throw new IllegalArgumentException(
                     "Permission already exists for file " + fileUuid + " and user " + username);
         }

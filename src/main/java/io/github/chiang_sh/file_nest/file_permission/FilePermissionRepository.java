@@ -23,4 +23,6 @@ public interface FilePermissionRepository extends JpaRepository<FilePermissionEn
     List<FilePermissionResponse> findByFileUuid(UUID fileUuid);
 
     Optional<FilePermissionEntity> findByUuid(UUID uuid);
+
+    boolean existsByFileUuidAndUserUsername(UUID fileUuid, String username);
 }
