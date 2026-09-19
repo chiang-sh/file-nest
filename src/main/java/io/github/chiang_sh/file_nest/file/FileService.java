@@ -156,10 +156,16 @@ public class FileService {
                                             new NoSuchElementException(
                                                     "Folder not exist: " + folderUuid));
             permission.setFolder(folder);
+        } else {
+            permission.setFolder(null);
         }
-        if (filename != null && !filename.isBlank()) {
-            file.setName(filename);
+        if (permission.getPermission() != FilePermissionType.OWNER
+                && permission.getPermission() != FilePermissionType.WRITE
+                && !filename.equals(file.getName())) {
+            throw new AccessDeniedException(
+                    "Renaming a file requires OWNER or WRITE permission.: " + uuid);
         }
+        file.setName(filename);
         fileRepository.save(file);
         return FileResponse.from(file, permission);
     }

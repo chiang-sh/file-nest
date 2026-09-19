@@ -8,6 +8,7 @@ import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.security.SecurityUser;
 import io.minio.Http;
 import io.minio.errors.MinioException;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +62,15 @@ public class FileController {
         return fileService.presignedUrl(file.getStoragePath(), Http.Method.GET);
     }
 
-    @PatchMapping("/{fileUuid}")
+    @PutMapping("/{fileUuid}")
+    @Operation(description = "All request fields are required.")
     public FileResponse updateInfo(
             @AuthenticationPrincipal SecurityUser securityUser,
             @PathVariable UUID fileUuid,
             @RequestBody UpdateFileRequest body) {
+        if (body.filename() == null || body.filename().isBlank()) {
+            throw new IllegalArgumentException("The argument must not be null.");
+        }
         return fileService.updateInfo(
                 securityUser.getId(), fileUuid, body.folderUuid(), body.filename());
     }
