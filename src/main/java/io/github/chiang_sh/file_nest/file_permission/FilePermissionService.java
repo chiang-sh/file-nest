@@ -82,11 +82,14 @@ public class FilePermissionService {
         }
         FilePermissionEntity permission =
                 filePermissionRepository
-                        .findByUuid(permissionUuid)
+                        .findByUuidAndFileUuid(permissionUuid, fileUuid)
                         .orElseThrow(
                                 () ->
                                         new NoSuchElementException(
-                                                "Permission not exist: " + permissionUuid));
+                                                "Permission "
+                                                        + permissionUuid
+                                                        + " does not exist for file "
+                                                        + fileUuid));
         permission.setPermission(permissionType);
         filePermissionRepository.save(permission);
         return FilePermissionResponse.from(permission);
@@ -95,11 +98,14 @@ public class FilePermissionService {
     public void delete(Long userId, UUID fileUuid, UUID permissionUuid) {
         FilePermissionEntity permission =
                 filePermissionRepository
-                        .findByUuid(permissionUuid)
+                        .findByUuidAndFileUuid(permissionUuid, fileUuid)
                         .orElseThrow(
                                 () ->
                                         new NoSuchElementException(
-                                                "Permission not exist: " + permissionUuid));
+                                                "Permission "
+                                                        + permissionUuid
+                                                        + " does not exist for file "
+                                                        + fileUuid));
         if (!permission.getUser().getId().equals(userId)) {
             filePermissionRepository
                     .findByUserIdAndFileUuidAndPermission(
