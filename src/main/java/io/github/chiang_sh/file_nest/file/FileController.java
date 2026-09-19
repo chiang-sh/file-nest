@@ -72,8 +72,7 @@ public class FileController {
 
     @DeleteMapping("/{fileUuid}")
     public ResponseEntity<Void> deleteFile(
-            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid)
-            throws MinioException {
+            @AuthenticationPrincipal SecurityUser securityUser, @PathVariable UUID fileUuid) {
         fileService.confirmDelete(securityUser.getId(), fileUuid);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }

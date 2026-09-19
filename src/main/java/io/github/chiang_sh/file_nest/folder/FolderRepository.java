@@ -35,4 +35,23 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
     Optional<FolderEntity> findByUuidAndOwnerId(UUID uuid, Long ownerId);
 
     int countByOwnerIdAndParentFolderUuid(Long ownerId, UUID parentFolderUuid);
+
+    @Query(
+            value =
+                    """
+            WITH RECURSIVE ancestors(id, uuid, parent_folder_id) AS (
+                SELECT id, uuid, parent_folder_id
+                FROM folders
+                WHERE uuid = :parentFolderUuid
+                AND owner_id = :userId
+                UNION
+                SELECT f.id, f.uuid, f.parent_folder_id
+                FROM folders f
+                JOIN ancestors ON ancestors.parent_folder_id = f.id
+                WHERE f.owner_id = :userId
+            )
+            SELECT uuid from ancestors;
+            """,
+            nativeQuery = true)
+    List<UUID> findParentFolderUuid(Long userId, UUID parentFolderUuid);
 }

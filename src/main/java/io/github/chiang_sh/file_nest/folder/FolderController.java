@@ -54,7 +54,7 @@ public class FolderController {
     public ResponseEntity<FolderResponse> createFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
             @RequestBody CreateFolderRequest body) {
-        if (body.name() == null || body.name().isEmpty()) {
+        if (body.name() == null || body.name().isBlank()) {
             throw new IllegalArgumentException("The argument must not be null.");
         }
         FolderResponse response =
@@ -62,11 +62,15 @@ public class FolderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{folderUuid}")
+    @PutMapping("/{folderUuid}")
+    @Operation(description = "All request fields are required.")
     public FolderResponse updateFolder(
             @AuthenticationPrincipal SecurityUser securityUser,
             @PathVariable UUID folderUuid,
             @RequestBody UpdateFolderRequest body) {
+        if (body.name() == null || body.name().isBlank()) {
+            throw new IllegalArgumentException("The argument must not be null.");
+        }
         return folderService.update(
                 securityUser.getId(), folderUuid, body.parentUuid(), body.name());
     }

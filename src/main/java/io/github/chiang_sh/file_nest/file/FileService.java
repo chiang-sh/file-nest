@@ -157,7 +157,7 @@ public class FileService {
                                                     "Folder not exist: " + folderUuid));
             permission.setFolder(folder);
         }
-        if (filename != null && !filename.isEmpty()) {
+        if (filename != null && !filename.isBlank()) {
             file.setName(filename);
         }
         fileRepository.save(file);

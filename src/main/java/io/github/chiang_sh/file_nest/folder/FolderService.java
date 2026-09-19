@@ -109,9 +109,13 @@ public class FolderService {
                         .findByUuidAndOwnerId(uuid, userId)
                         .orElseThrow(() -> new NoSuchElementException("Folder not exist: " + uuid));
         if (parentUuid != null) {
-            if (parentUuid.equals(uuid)) {
+            List<UUID> parentAncestorUuids =
+                    folderRepository.findParentFolderUuid(userId, parentUuid);
+            // A cyclic relationship occurs when the current folder is an ancestor of the given
+            // parent folder.
+            if (parentAncestorUuids.contains(uuid)) {
                 throw new IllegalArgumentException(
-                        "The parent UUID must not be the same as the resource UUID.");
+                        "Invalid parent folder: this operation would create a cyclic hierarchy.");
             }
             FolderEntity parent =
                     folderRepository
@@ -121,10 +125,10 @@ public class FolderService {
                                             new NoSuchElementException(
                                                     "Folder not exist: " + parentUuid));
             folder.setParentFolder(parent);
+        } else {
+            folder.setParentFolder(null);
         }
-        if (name != null && !name.isEmpty()) {
-            folder.setName(name);
-        }
+        folder.setName(name);
         folderRepository.save(folder);
         return FolderResponse.from(folder);
     }
