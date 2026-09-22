@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Transactional(rollbackFor = Exception.class)
 public class FileService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
 
     private final UserRepository userRepository;
     private final FileRepository fileRepository;

@@ -16,7 +16,7 @@ import java.io.IOException;
 @Component
 public class ApiLogFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
     @Override
     protected void doFilterInternal(
@@ -28,7 +28,7 @@ public class ApiLogFilter extends OncePerRequestFilter {
             filterChain.doFilter(wrappedRequest, response);
         } finally {
             long end = System.currentTimeMillis();
-            logger.info(
+            LOGGER.info(
                     "[{}] {}{} - status={} body={} time={}ms",
                     request.getMethod(),
                     request.getRequestURI(),

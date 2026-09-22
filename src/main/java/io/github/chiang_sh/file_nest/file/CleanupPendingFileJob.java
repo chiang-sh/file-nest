@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class CleanupPendingFileJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(CleanupPendingFileJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CleanupPendingFileJob.class);
     private final FileService fileService;
 
     public CleanupPendingFileJob(FileService fileService) {
@@ -20,7 +20,7 @@ public class CleanupPendingFileJob {
 
     @Scheduled(cron = "0 0 3 * * *") // Run the job at 3:00 AM every day.
     public void cleanup() {
-        logger.info("Cleanup pending files job started.");
+        LOGGER.info("Cleanup pending files job started.");
         Long lastId = 0L;
         int deleteCount = 0;
 
@@ -40,11 +40,11 @@ public class CleanupPendingFileJob {
                     fileService.deleteRecord(file);
                     deleteCount++;
                 } catch (Exception e) {
-                    logger.error("Failed to clean up pending file {}", file.getUuid(), e);
+                    LOGGER.error("Failed to clean up pending file {}", file.getUuid(), e);
                 }
             }
             lastId = files.getLast().getId();
         }
-        logger.info("Cleanup pending files job completed. Deleted {} files.", deleteCount);
+        LOGGER.info("Cleanup pending files job completed. Deleted {} files.", deleteCount);
     }
 }

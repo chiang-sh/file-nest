@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CleanupDeletingFileJob {
 
-    private static final Logger logger = LoggerFactory.getLogger(CleanupDeletingFileJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CleanupDeletingFileJob.class);
     private final FileService fileService;
 
     public CleanupDeletingFileJob(FileService fileService) {
@@ -20,7 +20,7 @@ public class CleanupDeletingFileJob {
 
     @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
     public void cleanup() {
-        logger.info("Cleanup deleting files job started.");
+        LOGGER.info("Cleanup deleting files job started.");
         Long lastId = 0L;
         int deleteCount = 0;
         while (true) {
@@ -35,11 +35,11 @@ public class CleanupDeletingFileJob {
                     fileService.deleteRecord(file);
                     deleteCount++;
                 } catch (Exception e) {
-                    logger.error("Failed to clean up deleting file {}", file.getUuid(), e);
+                    LOGGER.error("Failed to clean up deleting file {}", file.getUuid(), e);
                 }
             }
             lastId = files.getLast().getId();
         }
-        logger.info("Cleanup deleting files job completed. Deleted {} files.", deleteCount);
+        LOGGER.info("Cleanup deleting files job completed. Deleted {} files.", deleteCount);
     }
 }

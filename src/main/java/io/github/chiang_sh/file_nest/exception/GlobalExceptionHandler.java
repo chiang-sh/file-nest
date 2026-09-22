@@ -13,29 +13,29 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> badRequest(Exception e) {
-        logger.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage(), e);
         return ResponseEntity.badRequest().build();
     }
 
     @ExceptionHandler(exception = {NoSuchElementException.class, IllegalStateException.class})
     public ResponseEntity<String> notFound(Exception e) {
-        logger.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage(), e);
         return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> forbidden(Exception e) {
-        logger.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> generalException(Exception e) {
-        logger.error("Unhandled exception", e);
+        LOGGER.error("Unhandled exception", e);
         return ResponseEntity.internalServerError().body("Internal server error.");
     }
 }
