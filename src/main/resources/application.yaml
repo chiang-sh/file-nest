@@ -32,6 +32,8 @@ security:
     /v3/api-docs.yaml,
     /swagger-ui/**,
     /swagger-ui.html
+  jwt:
+    secret_base64: ${JWT_SECRET_BASE64}
 minio:
   endpoint: ${MINIO_ENDPOINT}
   access-key: ${MINIO_ACCESS_KEY}

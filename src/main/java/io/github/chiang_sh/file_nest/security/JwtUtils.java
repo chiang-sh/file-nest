@@ -1,9 +1,12 @@
 package io.github.chiang_sh.file_nest.security;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -15,15 +18,23 @@ import javax.crypto.SecretKey;
 public class JwtUtils {
     static final String JWT_HEADER = "Authorization";
     static final String TOKEN_PREFIX = "Bearer ";
-    static final SecretKey KEY = Jwts.SIG.HS256.key().build();
     static final long EXPIRATION_TIME = 60 * 60 * 1000;
+    final SecretKey key;
+
+    public JwtUtils(@Value("${security.jwt.secret-base64}") String secretBase64) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretBase64);
+        if (keyBytes.length != 32) {
+            throw new IllegalArgumentException("Invalid JWT secret.");
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String generateToken(String username) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date exp = new Date(nowMillis + EXPIRATION_TIME);
         return Jwts.builder()
-                .signWith(KEY)
+                .signWith(key)
                 .subject(username)
                 .issuedAt(now)
                 .expiration(exp)
@@ -40,7 +51,7 @@ public class JwtUtils {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith(KEY).build().parseSignedClaims(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -49,7 +60,7 @@ public class JwtUtils {
 
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
-                .verifyWith(KEY)
+                .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
