@@ -1,4 +1,4 @@
-package io.github.chiang_sh.file_nest.minio;
+package io.github.chiang_sh.file_nest.config.minio;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

@@ -6,7 +6,7 @@ import io.github.chiang_sh.file_nest.file_permission.FilePermissionRepository;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;
 import io.github.chiang_sh.file_nest.folder.FolderEntity;
 import io.github.chiang_sh.file_nest.folder.FolderRepository;
-import io.github.chiang_sh.file_nest.minio.MinioProperties;
+import io.github.chiang_sh.file_nest.config.minio.MinioProperties;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.*;
 import io.minio.errors.MinioException;
