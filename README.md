@@ -32,23 +32,27 @@ The project is built with:
 * Java 26
 * Spring Boot 4.1.0
 * PostgreSQL
+* Kafka
 * MinIO
 
 ## Configuration
-To run the project, first create a PostgreSQL database and a MinIO instance. Then configure the database and MinIO credentials in `application.yaml`:
+To run the project, provision a PostgreSQL database, a MinIO instance, and a Kafka broker. Set the environment variables as follows:
 
 ```yaml
 spring:
   datasource:
-    url:
-    username:
-    password:
-
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER}
+    consumer:
+      group-id: ${KAFKA_GROUP_ID}
 minio:
-  endpoint:
-  access-key:
-  secret-key:
-  bucket-name:
+  endpoint: ${MINIO_ENDPOINT}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: ${MINIO_BUCKET_NAME}
 ```
 
 ## Testing the APIs
