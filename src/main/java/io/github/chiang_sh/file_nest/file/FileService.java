@@ -1,12 +1,12 @@
 package io.github.chiang_sh.file_nest.file;
 
+import io.github.chiang_sh.file_nest.config.minio.MinioProperties;
 import io.github.chiang_sh.file_nest.file.dto.FileResponse;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionEntity;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionRepository;
 import io.github.chiang_sh.file_nest.file_permission.FilePermissionType;
 import io.github.chiang_sh.file_nest.folder.FolderEntity;
 import io.github.chiang_sh.file_nest.folder.FolderRepository;
-import io.github.chiang_sh.file_nest.config.minio.MinioProperties;
 import io.github.chiang_sh.file_nest.user.UserRepository;
 import io.minio.*;
 import io.minio.errors.MinioException;
@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -170,21 +171,28 @@ public class FileService {
         return FileResponse.from(file, permission);
     }
 
-    public void confirmDelete(Long userId, UUID uuid) {
+    public boolean confirmDelete(Long userId, UUID uuid) {
         FilePermissionEntity permission = getAccessiblePermission(userId, uuid);
         // Delete the file record if the permission is OWNER and WRITE.
+        boolean shouldDelete = false;
         if (permission.getPermission() == FilePermissionType.OWNER
                 || permission.getPermission() == FilePermissionType.WRITE) {
             FileEntity file = permission.getFile();
             file.setStatus(StatusType.DELETING);
             fileRepository.save(file);
+            shouldDelete = true;
         }
         filePermissionRepository.delete(permission);
+        return shouldDelete;
     }
 
     public List<FileEntity> findCleanupFiles(
             StatusType status, Long lastId, OffsetDateTime datetime) {
         return fileRepository.findCleanupBatch(status, lastId, PageRequest.of(0, 100), datetime);
+    }
+
+    public Optional<FileEntity> findCleanupFile(String uuidValue) {
+        return fileRepository.findByUuid(UUID.fromString(uuidValue));
     }
 
     public void deleteObject(FileEntity file) throws MinioException {

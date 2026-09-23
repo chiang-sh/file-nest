@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -40,17 +39,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileResponse> findChildrenFiles(Long userId, UUID parentUuid, int pageSize, int offset);
 
     Optional<FileEntity> findByUuid(UUID uuid);
-
-    @Query(
-            """
-            SELECT f
-            FROM FilePermissionEntity fp
-            JOIN fp.file f
-            WHERE fp.folder.id = :folderId
-            AND fp.user.id = :userId
-            AND f.status = StatusType.COMPLETED""")
-    List<FileEntity> findByUserIdAndFolderId(
-            @Param("userId") Long userId, @Param("folderId") Long folderId);
 
     @Query(
             """
